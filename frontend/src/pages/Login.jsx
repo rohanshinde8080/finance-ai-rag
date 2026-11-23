@@ -82,10 +82,6 @@ export const Login = () => {
             </Link>
           </div>
         </div>
-
-        <div className="auth-demo-hint">
-          <strong>Default Admin Demo:</strong> admin@financeai.com / AdminSecure#2026!
-        </div>
       </div>
     </div>
   );
