@@ -1,0 +1,55 @@
+from datetime import datetime
+from typing import Optional
+from uuid import UUID
+from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator
+import re
+
+class UserRegisterRequest(BaseModel):
+    """Schema for standard user registration."""
+    full_name: str = Field(..., min_length=2, max_length=150, description="Full name of user")
+    email: EmailStr = Field(..., description="Valid user email address")
+    password: str = Field(..., min_length=8, max_length=128, description="Password (minimum 8 characters)")
+
+    @field_validator("password")
+    @classmethod
+    def validate_password_complexity(cls, v: str) -> str:
+        if len(v) < 8:
+            raise ValueError("Password must be at least 8 characters long.")
+        if not re.search(r"\d", v) and not re.search(r"[!@#$%^&*(),.?\":{}|<>]", v):
+            raise ValueError("Password must contain at least one digit or special character.")
+        return v
+
+    @field_validator("full_name")
+    @classmethod
+    def clean_full_name(cls, v: str) -> str:
+        cleaned = v.strip()
+        if not cleaned:
+            raise ValueError("Full name cannot be blank.")
+        return cleaned
+
+class UserLoginRequest(BaseModel):
+    """Schema for user and admin login."""
+    email: EmailStr = Field(..., description="Registered email address")
+    password: str = Field(..., description="User password")
+
+class UserResponse(BaseModel):
+    """Public user response schema."""
+    model_config = ConfigDict(from_attributes=True)
+
+    id: UUID
+    email: str
+    full_name: str
+    role: str
+    is_active: bool
+    created_at: datetime
+
+class TokenResponse(BaseModel):
+    """JWT Token response schema."""
+    access_token: str
+    token_type: str = "bearer"
+    user: UserResponse
+
+class MessageResponse(BaseModel):
+    """Generic status response schema."""
+    message: str
+    detail: Optional[str] = None
