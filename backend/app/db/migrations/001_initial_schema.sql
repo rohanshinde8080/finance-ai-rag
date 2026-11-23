@@ -15,6 +15,9 @@ CREATE TABLE IF NOT EXISTS users (
     password_hash VARCHAR(255) NOT NULL,
     role VARCHAR(50) NOT NULL DEFAULT 'user' CHECK (role IN ('user', 'admin')),
     is_active BOOLEAN NOT NULL DEFAULT TRUE,
+    gender VARCHAR(50),
+    mobile_number VARCHAR(20),
+    date_of_birth DATE,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );

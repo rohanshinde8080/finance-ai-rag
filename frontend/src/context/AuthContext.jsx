@@ -42,8 +42,8 @@ export const AuthProvider = ({ children }) => {
     return data.user;
   };
 
-  const register = async (fullName, email, password) => {
-    return await authService.register(fullName, email, password);
+  const register = async (...args) => {
+    return await authService.register(...args);
   };
 
   const logout = async () => {

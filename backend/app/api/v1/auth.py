@@ -44,11 +44,18 @@ def register(request: UserRegisterRequest):
         hashed_pwd = hash_password(request.password)
         cur.execute(
             """
-            INSERT INTO users (email, full_name, password_hash, role, is_active)
-            VALUES (%s, %s, %s, 'user', TRUE)
-            RETURNING id, email, full_name, role, is_active, created_at;
+            INSERT INTO users (email, full_name, password_hash, role, is_active, gender, mobile_number, date_of_birth)
+            VALUES (%s, %s, %s, 'user', TRUE, %s, %s, %s)
+            RETURNING id, email, full_name, role, is_active, gender, mobile_number, date_of_birth, created_at;
             """,
-            (email_clean, request.full_name, hashed_pwd)
+            (
+                email_clean,
+                request.full_name,
+                hashed_pwd,
+                request.gender,
+                request.mobile_number,
+                request.date_of_birth
+            )
         )
         new_user = cur.fetchone()
 
@@ -72,7 +79,7 @@ def login(request: UserLoginRequest):
     with get_db_cursor() as cur:
         cur.execute(
             """
-            SELECT id, email, full_name, password_hash, role, is_active, created_at
+            SELECT id, email, full_name, password_hash, role, is_active, gender, mobile_number, date_of_birth, created_at
             FROM users
             WHERE email = %s;
             """,

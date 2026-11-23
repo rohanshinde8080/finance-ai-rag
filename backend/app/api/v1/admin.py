@@ -107,7 +107,7 @@ def list_users(
 ):
     """Returns a paginated list of registered user accounts with activity stats."""
     query = """
-        SELECT u.id, u.email, u.full_name, u.role, u.is_active, u.created_at,
+        SELECT u.id, u.email, u.full_name, u.role, u.is_active, u.gender, u.mobile_number, u.date_of_birth, u.created_at,
                COUNT(s.id) AS session_count
         FROM users u
         LEFT JOIN chat_sessions s ON u.id = s.user_id

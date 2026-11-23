@@ -34,7 +34,7 @@ def get_current_user(token: str = Depends(oauth2_scheme)) -> Dict[str, Any]:
     with get_db_cursor() as cur:
         cur.execute(
             """
-            SELECT id, email, full_name, role, is_active, created_at
+            SELECT id, email, full_name, role, is_active, gender, mobile_number, date_of_birth, created_at
             FROM users 
             WHERE id = %s;
             """,

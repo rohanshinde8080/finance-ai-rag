@@ -6,6 +6,9 @@ import "../styles/auth.css";
 export const Register = () => {
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
+  const [gender, setGender] = useState("");
+  const [mobileNumber, setMobileNumber] = useState("");
+  const [dateOfBirth, setDateOfBirth] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -24,7 +27,14 @@ export const Register = () => {
 
     setSubmitting(true);
     try {
-      await register(fullName, email, password);
+      await register({
+        full_name: fullName,
+        email,
+        password,
+        gender: gender || null,
+        mobile_number: mobileNumber || null,
+        date_of_birth: dateOfBirth || null,
+      });
       await login(email, password);
       navigate("/dashboard");
     } catch (err) {
@@ -49,7 +59,7 @@ export const Register = () => {
 
         <form onSubmit={handleSubmit}>
           <div className="auth-form-group">
-            <label className="auth-form-label">Full Name</label>
+            <label className="auth-form-label">Full Name *</label>
             <input
               type="text"
               required
@@ -61,7 +71,7 @@ export const Register = () => {
           </div>
 
           <div className="auth-form-group">
-            <label className="auth-form-label">Email Address</label>
+            <label className="auth-form-label">Email Address *</label>
             <input
               type="email"
               required
@@ -72,8 +82,46 @@ export const Register = () => {
             />
           </div>
 
+          <div className="auth-form-row">
+            <div className="auth-form-group">
+              <label className="auth-form-label">Gender</label>
+              <select
+                className="auth-select"
+                value={gender}
+                onChange={(e) => setGender(e.target.value)}
+              >
+                <option value="">Select Gender</option>
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+                <option value="Other">Other</option>
+                <option value="Prefer not to say">Prefer not to say</option>
+              </select>
+            </div>
+
+            <div className="auth-form-group">
+              <label className="auth-form-label">Date of Birth</label>
+              <input
+                type="date"
+                className="auth-input"
+                value={dateOfBirth}
+                onChange={(e) => setDateOfBirth(e.target.value)}
+              />
+            </div>
+          </div>
+
           <div className="auth-form-group">
-            <label className="auth-form-label">Password</label>
+            <label className="auth-form-label">Mobile Number</label>
+            <input
+              type="tel"
+              className="auth-input"
+              value={mobileNumber}
+              onChange={(e) => setMobileNumber(e.target.value)}
+              placeholder="e.g. +91 98765 43210"
+            />
+          </div>
+
+          <div className="auth-form-group">
+            <label className="auth-form-label">Password *</label>
             <input
               type="password"
               required

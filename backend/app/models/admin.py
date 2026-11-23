@@ -28,6 +28,9 @@ class AdminUserListItem(BaseModel):
     full_name: str
     role: str
     is_active: bool
+    gender: Optional[str] = None
+    mobile_number: Optional[str] = None
+    date_of_birth: Optional[Any] = None
     created_at: datetime
     session_count: int = 0
 

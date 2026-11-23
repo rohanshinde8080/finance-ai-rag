@@ -121,6 +121,7 @@ export const AdminUsers = () => {
           <thead>
             <tr>
               <th>Full Name & Email</th>
+              <th>Profile & Contact</th>
               <th>System Role</th>
               <th>Chat Sessions</th>
               <th>Registration Date</th>
@@ -131,14 +132,14 @@ export const AdminUsers = () => {
           <tbody>
             {loading ? (
               <tr>
-                <td colSpan="6" style={{ textAlign: "center", padding: "32px", color: "var(--text-secondary)" }}>
+                <td colSpan="7" style={{ textAlign: "center", padding: "32px", color: "var(--text-secondary)" }}>
                   <RefreshCw className="spin" size={20} style={{ margin: "0 auto 8px" }} />
                   <div>Loading user directory...</div>
                 </td>
               </tr>
             ) : users.length === 0 ? (
               <tr>
-                <td colSpan="6" style={{ textAlign: "center", padding: "32px", color: "var(--text-secondary)" }}>
+                <td colSpan="7" style={{ textAlign: "center", padding: "32px", color: "var(--text-secondary)" }}>
                   No users found matching your search.
                 </td>
               </tr>
@@ -152,6 +153,14 @@ export const AdminUsers = () => {
                         {u.full_name} {isSelf && <span style={{ fontSize: "11px", color: "var(--accent-blue)" }}>(You)</span>}
                       </div>
                       <div style={{ fontSize: "11px", color: "var(--text-muted)" }}>{u.email}</div>
+                    </td>
+                    <td>
+                      <div style={{ fontSize: "12px", color: "var(--primary-navy)", fontWeight: 600 }}>
+                        {u.mobile_number || <span style={{ color: "var(--text-muted)", fontWeight: 400 }}>No phone</span>}
+                      </div>
+                      <div style={{ fontSize: "11px", color: "var(--text-muted)" }}>
+                        {[u.gender, u.date_of_birth ? `DOB: ${u.date_of_birth}` : null].filter(Boolean).join(" • ") || "—"}
+                      </div>
                     </td>
                     <td>
                       <span style={{

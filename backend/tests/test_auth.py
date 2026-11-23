@@ -84,6 +84,21 @@ def test_user_registration_model_validation():
             password="StrongPassword#2026"
         )
 
+def test_user_registration_with_extended_demographics():
+    """Verify registration request with gender, mobile number, and date of birth."""
+    data = {
+        "full_name": "Rohan Sharma",
+        "email": "rohan.sharma@example.com",
+        "password": "StrongPassword#2026",
+        "gender": "Male",
+        "mobile_number": "+91 9876543210",
+        "date_of_birth": "2000-01-15"
+    }
+    req = UserRegisterRequest(**data)
+    assert req.gender == "Male"
+    assert req.mobile_number == "+91 9876543210"
+    assert req.date_of_birth == "2000-01-15"
+
 def test_user_login_model_validation():
     """Verify validation rules on login input."""
     valid_login = {

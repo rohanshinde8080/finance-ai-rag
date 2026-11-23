@@ -1,5 +1,5 @@
-from datetime import datetime
-from typing import Optional
+from datetime import datetime, date
+from typing import Any, Optional, Union
 from uuid import UUID
 from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator
 import re
@@ -9,6 +9,19 @@ class UserRegisterRequest(BaseModel):
     full_name: str = Field(..., min_length=2, max_length=150, description="Full name of user")
     email: EmailStr = Field(..., description="Valid user email address")
     password: str = Field(..., min_length=8, max_length=128, description="Password (minimum 8 characters)")
+    gender: Optional[str] = Field(None, max_length=50, description="User gender (e.g., Male, Female, Other)")
+    mobile_number: Optional[str] = Field(None, max_length=20, description="User mobile contact number")
+    date_of_birth: Optional[str] = Field(None, description="Date of birth in YYYY-MM-DD format")
+
+    @field_validator("gender", "mobile_number", "date_of_birth", mode="before")
+    @classmethod
+    def clean_optional_fields(cls, v: Any) -> Optional[str]:
+        if v is None:
+            return None
+        if isinstance(v, str):
+            s = v.strip()
+            return s if s else None
+        return str(v)
 
     @field_validator("password")
     @classmethod
@@ -41,6 +54,9 @@ class UserResponse(BaseModel):
     full_name: str
     role: str
     is_active: bool
+    gender: Optional[str] = None
+    mobile_number: Optional[str] = None
+    date_of_birth: Optional[Any] = None
     created_at: datetime
 
 class TokenResponse(BaseModel):
