@@ -13,15 +13,15 @@ async def lifespan(app: FastAPI):
     """Application lifespan manager for startup and shutdown procedures."""
     logger.info(f"Starting {settings.APP_NAME} in {settings.APP_ENV} mode...")
     
-    # 1. Initialize DB connection pool
     try:
-        init_db_pool()
-        logger.info("Database pool established.")
-        
-        # 2. Run automated SQL schema migrations and admin seeding
+        # 1. Run automated SQL schema migrations and admin seeding first (creates vector extension)
         logger.info("Executing database schema migrations...")
         run_migrations()
         logger.info("Database migrations successfully executed.")
+
+        # 2. Initialize DB connection pool with pgvector registered
+        init_db_pool()
+        logger.info("Database pool established.")
 
         # 3. Initialize or warm up the FAISS in-memory index
         logger.info("Synchronizing FAISS vector index...")
@@ -71,7 +71,7 @@ async def global_exception_handler(request: Request, exc: Exception):
     )
 
 # Root & Health Endpoints
-@app.get("/", tags=["Health"])
+@app.api_route("/", methods=["GET", "HEAD"], tags=["Health"])
 def root():
     return {
         "app": settings.APP_NAME,
@@ -80,7 +80,7 @@ def root():
         "documentation": "/docs"
     }
 
-@app.get("/health", tags=["Health"])
+@app.api_route("/health", methods=["GET", "HEAD"], tags=["Health"])
 def health():
     db_alive = check_db_health()
     return {

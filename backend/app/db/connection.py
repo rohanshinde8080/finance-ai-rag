@@ -9,6 +9,13 @@ from app.utils.logger import logger
 
 _db_pool: Optional[ConnectionPool] = None
 
+def _configure_connection(conn: psycopg.Connection) -> None:
+    """Configures each connection in the pool with pgvector support."""
+    try:
+        register_vector(conn)
+    except Exception as e:
+        logger.warning(f"pgvector registration deferred: {e}")
+
 def init_db_pool() -> ConnectionPool:
     """Initializes the global psycopg connection pool with pgvector support."""
     global _db_pool
@@ -22,7 +29,7 @@ def init_db_pool() -> ConnectionPool:
                 timeout=settings.DB_TIMEOUT_SECONDS,
                 kwargs={"connect_timeout": 3},
                 open=True,
-                configure=lambda conn: register_vector(conn)
+                configure=_configure_connection
             )
             logger.info("PostgreSQL connection pool initialized successfully.")
         except Exception as e:
