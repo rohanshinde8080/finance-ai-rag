@@ -10,6 +10,7 @@ export const Register = () => {
   const [mobileNumber, setMobileNumber] = useState("");
   const [dateOfBirth, setDateOfBirth] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
@@ -22,6 +23,11 @@ export const Register = () => {
 
     if (password.length < 8) {
       setError("Password must be at least 8 characters long.");
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      setError("Passwords do not match. Please ensure both passwords are identical.");
       return;
     }
 
@@ -120,16 +126,30 @@ export const Register = () => {
             />
           </div>
 
-          <div className="auth-form-group">
-            <label className="auth-form-label">Password *</label>
-            <input
-              type="password"
-              required
-              className="auth-input"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="Minimum 8 chars with digit/special char"
-            />
+          <div className="auth-form-row">
+            <div className="auth-form-group">
+              <label className="auth-form-label">Password *</label>
+              <input
+                type="password"
+                required
+                className="auth-input"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Min 8 characters"
+              />
+            </div>
+
+            <div className="auth-form-group">
+              <label className="auth-form-label">Confirm Password *</label>
+              <input
+                type="password"
+                required
+                className="auth-input"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                placeholder="Re-enter password"
+              />
+            </div>
           </div>
 
           <button type="submit" disabled={submitting} className="auth-button">
