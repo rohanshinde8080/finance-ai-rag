@@ -1,6 +1,18 @@
 import axios from "axios";
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000/api/v1";
+// Detect if running in local development environment
+const isLocalhost =
+  typeof window !== "undefined" &&
+  (window.location.hostname === "localhost" ||
+    window.location.hostname === "127.0.0.1" ||
+    window.location.hostname === "0.0.0.0");
+
+// In production (e.g. Vercel), fall back to the live Render backend if VITE_API_BASE_URL is not set
+const DEFAULT_API_URL = isLocalhost
+  ? "http://localhost:8000/api/v1"
+  : "https://finance-ai-rag.onrender.com/api/v1";
+
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || DEFAULT_API_URL;
 
 const api = axios.create({
   baseURL: API_BASE_URL,
