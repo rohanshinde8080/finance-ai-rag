@@ -39,7 +39,7 @@ export const Login = () => {
             <div className="auth-brand-badge">F</div>
             FinanceAI
           </div>
-          <div className="auth-subtitle">Domain-Specific Financial Assistant using RAG</div>
+          <div className="auth-subtitle">AI-Powered Financial Advisory & Regulatory Intelligence</div>
         </div>
 
         {error && <div className="auth-error">{error}</div>}
