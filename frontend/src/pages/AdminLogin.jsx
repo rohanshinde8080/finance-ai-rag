@@ -85,10 +85,6 @@ export const AdminLogin = () => {
         <div className="auth-footer">
           <Link to="/login" style={{ color: "var(--text-muted)" }}>← Return to User Login</Link>
         </div>
-
-        <div className="auth-demo-hint">
-          <strong>Default Admin:</strong> admin@financeai.com / AdminSecure#2026!
-        </div>
       </div>
     </div>
   );

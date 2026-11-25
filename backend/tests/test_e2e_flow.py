@@ -216,11 +216,9 @@ def test_e2e_admin_lifecycle_stats_and_user_management():
         {"id": target_user_id, "email": "flagged_student@financeai.com", "full_name": "Test Student", "is_active": False},
         # 14. get_feedback_summary: auth check
         {"id": admin_id, "email": "admin@financeai.com", "role": "admin", "is_active": True},
-        # 15. get_feedback_summary: total count
+        # 15. get_feedback_summary: count stats
         {"count": 48},
-        # 16. get_feedback_summary: positive count
         {"count": 45},
-        # 17. get_feedback_summary: negative count
         {"count": 3}
     ]
 
@@ -324,7 +322,7 @@ def test_e2e_web_fallback_when_unindexed():
 
     with patch("app.core.dependencies.get_db_cursor", mock_get_db_cursor), \
          patch("app.api.v1.chat.get_db_cursor", mock_get_db_cursor), \
-         patch("app.api.v1.chat.answer_financial_query", return_value=mock_web_response):
+         patch("app.api.v1.chat.answer_financial_query", return_value=mock_rag_response):
 
         res = client.post("/api/v1/chat/ask", headers=headers, json={
             "session_id": session_id,

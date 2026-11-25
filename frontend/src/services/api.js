@@ -7,12 +7,23 @@ const isLocalhost =
     window.location.hostname === "127.0.0.1" ||
     window.location.hostname === "0.0.0.0");
 
-// In production (e.g. Vercel), fall back to the live Render backend if VITE_API_BASE_URL is not set
-const DEFAULT_API_URL = isLocalhost
-  ? "http://localhost:8000/api/v1"
-  : "https://finance-ai-rag.onrender.com/api/v1";
+const getApiBaseUrl = () => {
+  const envUrl = import.meta.env.VITE_API_BASE_URL;
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || DEFAULT_API_URL;
+  // In production / deployed domains (e.g. *.vercel.app):
+  if (typeof window !== "undefined" && !isLocalhost) {
+    // If envUrl is missing or points to localhost, always route to the live Render backend
+    if (!envUrl || envUrl.includes("localhost") || envUrl.includes("127.0.0.1")) {
+      return "https://finance-ai-rag.onrender.com/api/v1";
+    }
+    return envUrl;
+  }
+
+  // In local development:
+  return envUrl || "http://localhost:8000/api/v1";
+};
+
+const API_BASE_URL = getApiBaseUrl();
 
 const api = axios.create({
   baseURL: API_BASE_URL,
