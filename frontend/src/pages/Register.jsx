@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { Eye, EyeOff } from "lucide-react";
 import "../styles/auth.css";
 
 export const Register = () => {
@@ -11,6 +12,8 @@ export const Register = () => {
   const [dateOfBirth, setDateOfBirth] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
@@ -44,7 +47,11 @@ export const Register = () => {
       await login(email, password);
       navigate("/dashboard");
     } catch (err) {
-      setError(err.response?.data?.detail || "Registration failed. Please check your details.");
+      if (!err.response) {
+        setError("Unable to connect to the backend server. Please check your network connection.");
+      } else {
+        setError(err.response?.data?.detail || "Registration failed. Please check your details.");
+      }
     } finally {
       setSubmitting(false);
     }
@@ -129,26 +136,46 @@ export const Register = () => {
           <div className="auth-form-row">
             <div className="auth-form-group">
               <label className="auth-form-label">Password *</label>
-              <input
-                type="password"
-                required
-                className="auth-input"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Min 8 characters"
-              />
+              <div className="auth-input-wrapper">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  required
+                  className="auth-input"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Min 8 characters"
+                />
+                <button
+                  type="button"
+                  className="auth-password-toggle"
+                  onClick={() => setShowPassword(!showPassword)}
+                  title={showPassword ? "Hide password" : "Show password"}
+                >
+                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                </button>
+              </div>
             </div>
 
             <div className="auth-form-group">
               <label className="auth-form-label">Confirm Password *</label>
-              <input
-                type="password"
-                required
-                className="auth-input"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                placeholder="Re-enter password"
-              />
+              <div className="auth-input-wrapper">
+                <input
+                  type={showConfirmPassword ? "text" : "password"}
+                  required
+                  className="auth-input"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  placeholder="Re-enter password"
+                />
+                <button
+                  type="button"
+                  className="auth-password-toggle"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  title={showConfirmPassword ? "Hide password" : "Show password"}
+                >
+                  {showConfirmPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                </button>
+              </div>
             </div>
           </div>
 

@@ -1,17 +1,24 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { ShieldAlert } from "lucide-react";
+import { ShieldAlert, Eye, EyeOff, Sparkles } from "lucide-react";
 import "../styles/auth.css";
 
 export const AdminLogin = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
   const { login } = useAuth();
   const navigate = useNavigate();
+
+  const handleFillDemo = () => {
+    setEmail("admin@financeai.com");
+    setPassword("AdminSecure#2026!");
+    setError("");
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -26,7 +33,11 @@ export const AdminLogin = () => {
       }
       navigate("/admin/dashboard");
     } catch (err) {
-      setError(err.response?.data?.detail || "Invalid admin credentials.");
+      if (!err.response) {
+        setError("Unable to connect to the backend server. Please verify the backend is running at http://localhost:8000.");
+      } else {
+        setError(err.response?.data?.detail || "Invalid admin credentials. Please verify your email and password.");
+      }
     } finally {
       setSubmitting(false);
     }
@@ -62,14 +73,45 @@ export const AdminLogin = () => {
 
           <div className="auth-form-group">
             <label className="auth-form-label">Password</label>
-            <input
-              type="password"
-              required
-              className="auth-input"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="••••••••"
-            />
+            <div className="auth-input-wrapper">
+              <input
+                type={showPassword ? "text" : "password"}
+                required
+                className="auth-input"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="AdminSecure#2026!"
+              />
+              <button
+                type="button"
+                className="auth-password-toggle"
+                onClick={() => setShowPassword(!showPassword)}
+                title={showPassword ? "Hide password" : "Show password"}
+              >
+                {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+              </button>
+            </div>
+          </div>
+
+          <div style={{ marginBottom: "14px", display: "flex", justifyContent: "flex-end" }}>
+            <button
+              type="button"
+              onClick={handleFillDemo}
+              style={{
+                background: "none",
+                border: "none",
+                color: "var(--accent-blue)",
+                fontSize: "12px",
+                cursor: "pointer",
+                padding: "2px 0",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "4px",
+                fontWeight: 600
+              }}
+            >
+              <Sparkles size={13} /> Auto-fill Admin Credentials
+            </button>
           </div>
 
           <button

@@ -1,11 +1,13 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { Eye, EyeOff } from "lucide-react";
 import "../styles/auth.css";
 
 export const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
@@ -25,7 +27,11 @@ export const Login = () => {
         navigate("/dashboard");
       }
     } catch (err) {
-      setError(err.response?.data?.detail || "Invalid email or password. Please try again.");
+      if (!err.response) {
+        setError("Unable to connect to the backend server. Please verify the backend is running at http://localhost:8000.");
+      } else {
+        setError(err.response?.data?.detail || "Invalid email or password. Please try again.");
+      }
     } finally {
       setSubmitting(false);
     }
@@ -59,14 +65,24 @@ export const Login = () => {
 
           <div className="auth-form-group">
             <label className="auth-form-label">Password</label>
-            <input
-              type="password"
-              required
-              className="auth-input"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="••••••••"
-            />
+            <div className="auth-input-wrapper">
+              <input
+                type={showPassword ? "text" : "password"}
+                required
+                className="auth-input"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••••••"
+              />
+              <button
+                type="button"
+                className="auth-password-toggle"
+                onClick={() => setShowPassword(!showPassword)}
+                title={showPassword ? "Hide password" : "Show password"}
+              >
+                {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+              </button>
+            </div>
           </div>
 
           <button type="submit" disabled={submitting} className="auth-button">
