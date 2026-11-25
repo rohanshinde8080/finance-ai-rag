@@ -22,27 +22,27 @@ export const chatService = {
   },
 
   async deleteAllSessions() {
-    const response = await api.delete("/chat/sessions");
-    return response.data;
-  },
+      const response = await api.delete("/chat/sessions");
+      return response.data;
+    },
 
   async askQuestion(sessionId, question, category = null, language = "English") {
-    const response = await api.post("/chat/ask", {
-      session_id: sessionId || null,
-      question,
-      category: category || null,
-      language: language || "English",
-    });
-    return response.data;
-  },
+      const response = await api.post("/chat/ask", {
+        session_id: sessionId || null,
+        question,
+        category: category || null,
+        language: language || "English",
+      });
+      return response.data;
+    },
 
   async submitFeedback(messageId, rating, comments = "") {
-    const response = await api.post("/feedback/", {
-      message_id: messageId,
-      rating,
-      comments: comments || null,
-    });
-    return response.data;
-  },
-};
+      const response = await api.post("/feedback/", {
+        message_id: messageId,
+        rating,
+        comments: comments || null,
+      });
+      return response.data;
+    },
+  };
 

@@ -61,7 +61,7 @@ export const ChatInterface = () => {
     if (saved) {
       try {
         return JSON.parse(saved);
-      } catch {}
+      } catch { }
     }
     return [
       {
@@ -312,344 +312,344 @@ export const ChatInterface = () => {
 
         <main className="chat-main">
           {selectedCategory && (
-            <div
-              style={{
-                background: "rgba(0, 141, 218, 0.08)",
-                borderBottom: "1px solid rgba(0, 141, 218, 0.2)",
-                padding: "6px 24px",
-                fontSize: "12px",
-                color: "var(--accent-blue)",
-                display: "flex",
-                alignItems: "center",
-                gap: "8px",
-              }}
-            >
-              <span>
-                Domain Filter Applied: <strong>{selectedCategory}</strong>
-              </span>
-              <button
-                onClick={() => setSelectedCategory(null)}
+              <div
                 style={{
-                  background: "transparent",
+                  background: "rgba(0, 141, 218, 0.08)",
+                  borderBottom: "1px solid rgba(0, 141, 218, 0.2)",
+                  padding: "6px 24px",
+                  fontSize: "12px",
                   color: "var(--accent-blue)",
-                  textDecoration: "underline",
-                  fontSize: "11px",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "8px",
                 }}
               >
-                Clear
-              </button>
-            </div>
-          )}
-
-          <div className="chat-messages-container">
-            {messages.length === 0 ? (
-              <div style={{ margin: "auto", maxWidth: "680px", textAlign: "center", padding: "40px 20px" }}>
-                <div
+                <span>
+                  Domain Filter Applied: <strong>{selectedCategory}</strong>
+                </span>
+                <button
+                  onClick={() => setSelectedCategory(null)}
                   style={{
-                    width: "56px",
-                    height: "56px",
-                    background: "linear-gradient(135deg, var(--accent-blue), var(--primary-navy))",
-                    color: "#FFF",
-                    borderRadius: "var(--radius-lg)",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    margin: "0 auto 16px auto",
-                    boxShadow: "var(--shadow-md)",
+                    background: "transparent",
+                    color: "var(--accent-blue)",
+                    textDecoration: "underline",
+                    fontSize: "11px",
                   }}
                 >
-                  <Sparkles size={28} />
-                </div>
-                <h2 style={{ fontSize: "24px", fontWeight: 800, color: "var(--primary-navy)", marginBottom: "8px" }}>
-                  How can FinanceAI assist you today?
-                </h2>
-                <p style={{ color: "var(--text-secondary)", fontSize: "14px", lineHeight: "1.6" }}>
-                  Ask questions about Indian banking, Income Tax, GST, RBI circulars, insurance, and mutual funds. All responses are verified against uploaded regulatory circulars with deterministic citations.
-                </p>
-
-                <div className="chat-chips-container" style={{ justifyContent: "center" }}>
-                  {SUGGESTED_PROMPTS.map((prompt, idx) => (
-                    <button
-                      key={idx}
-                      className="chat-chip"
-                      onClick={() => handleSendMessage(prompt)}
-                    >
-                      {prompt}
-                    </button>
-                  ))}
-                </div>
+                  Clear
+                </button>
               </div>
-            ) : (
+          )}
+
+              <div className="chat-messages-container">
+                {messages.length === 0 ? (
+                  <div style={{ margin: "auto", maxWidth: "680px", textAlign: "center", padding: "40px 20px" }}>
+                      <div
+                        style={{
+                          width: "56px",
+                          height: "56px",
+                          background: "linear-gradient(135deg, var(--accent-blue), var(--primary-navy))",
+                          color: "#FFF",
+                          borderRadius: "var(--radius-lg)",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          margin: "0 auto 16px auto",
+                          boxShadow: "var(--shadow-md)",
+                        }}
+                      >
+                        <Sparkles size={28} />
+                      </div>
+                      <h2 style={{ fontSize: "24px", fontWeight: 800, color: "var(--primary-navy)", marginBottom: "8px" }}>
+                        How can FinanceAI assist you today?
+                      </h2>
+                      <p style={{ color: "var(--text-secondary)", fontSize: "14px", lineHeight: "1.6" }}>
+                        Ask questions about Indian banking, Income Tax, GST, RBI circulars, insurance, and mutual funds. All responses are verified against uploaded regulatory circulars with deterministic citations.
+                      </p>
+
+                      <div className="chat-chips-container" style={{ justifyContent: "center" }}>
+                        {SUGGESTED_PROMPTS.map((prompt, idx) => (
+                          <button
+                            key={idx}
+                            className="chat-chip"
+                            onClick={() => handleSendMessage(prompt)}
+                          >
+                            {prompt}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                    ) : (
               messages.map((msg) => {
                 const isUser = msg.sender === "user";
-                const citations = msg.metadata?.citations || [];
-                const webSources = msg.metadata?.web_sources || [];
-                const disclaimer = msg.metadata?.disclaimer;
+                    const citations = msg.metadata?.citations || [];
+                    const webSources = msg.metadata?.web_sources || [];
+                    const disclaimer = msg.metadata?.disclaimer;
 
-                return (
-                  <div key={msg.id} className={`chat-bubble ${msg.sender}`}>
-                    {isUser ? (
-                      <div className="chat-content-user">{msg.content}</div>
-                    ) : (
-                      <div className="chat-content-assistant">
-                        {/* Grounding Source Badge */}
-                        <div style={{ marginBottom: "10px" }}>
-                          {msg.source_type === "document" && (
-                            <span
-                              style={{
-                                background: "rgba(16, 185, 129, 0.12)",
-                                color: "var(--accent-green)",
-                                padding: "3px 8px",
-                                borderRadius: "var(--radius-full)",
-                                fontSize: "11px",
-                                fontWeight: 700,
-                                textTransform: "uppercase",
-                              }}
-                            >
-                              ✓ Document Grounded (Deterministic)
-                            </span>
+                    return (
+                    <div key={msg.id} className={`chat-bubble ${msg.sender}`}>
+                      {isUser ? (
+                        <div className="chat-content-user">{msg.content}</div>
+                      ) : (
+                        <div className="chat-content-assistant">
+                          {/* Grounding Source Badge */}
+                          <div style={{ marginBottom: "10px" }}>
+                            {msg.source_type === "document" && (
+                                <span
+                                  style={{
+                                    background: "rgba(16, 185, 129, 0.12)",
+                                    color: "var(--accent-green)",
+                                    padding: "3px 8px",
+                                    borderRadius: "var(--radius-full)",
+                                    fontSize: "11px",
+                                    fontWeight: 700,
+                                    textTransform: "uppercase",
+                                  }}
+                                >
+                                  ✓ Document Grounded (Deterministic)
+                                </span>
                           )}
-                          {msg.source_type === "web" && (
-                            <span
-                              style={{
-                                background: "rgba(245, 158, 11, 0.12)",
-                                color: "var(--accent-amber)",
-                                padding: "3px 8px",
-                                borderRadius: "var(--radius-full)",
-                                fontSize: "11px",
-                                fontWeight: 700,
-                                textTransform: "uppercase",
-                              }}
-                            >
-                              🌐 Verified Web Fallback (Official Portals)
-                            </span>
+                                {msg.source_type === "web" && (
+                                    <span
+                                      style={{
+                                        background: "rgba(245, 158, 11, 0.12)",
+                                        color: "var(--accent-amber)",
+                                        padding: "3px 8px",
+                                        borderRadius: "var(--radius-full)",
+                                        fontSize: "11px",
+                                        fontWeight: 700,
+                                        textTransform: "uppercase",
+                                      }}
+                                    >
+                                      🌐 Verified Web Fallback (Official Portals)
+                                    </span>
                           )}
-                        </div>
+                                  </div>
 
                         {/* Text Content */}
-                        <div style={{ whiteSpace: "pre-wrap", lineHeight: "1.6" }}>
-                          {msg.content}
-                        </div>
+                                <div style={{ whiteSpace: "pre-wrap", lineHeight: "1.6" }}>
+                                  {msg.content}
+                                </div>
 
-                        {/* Document Citations */}
-                        {citations.length > 0 && (
-                          <div className="chat-citations-section">
-                            <span
-                              style={{
-                                fontSize: "11px",
-                                fontWeight: 700,
-                                color: "var(--text-secondary)",
-                                textTransform: "uppercase",
-                              }}
-                            >
-                              Official Sources & Page Citations ({citations.length})
-                            </span>
-                            {citations.map((c, i) => (
-                              <CitationCard key={i} citation={c} />
-                            ))}
-                          </div>
-                        )}
+                                {/* Document Citations */}
+                                {citations.length > 0 && (
+                                  <div className="chat-citations-section">
+                                      <span
+                                        style={{
+                                          fontSize: "11px",
+                                          fontWeight: 700,
+                                          color: "var(--text-secondary)",
+                                          textTransform: "uppercase",
+                                        }}
+                                      >
+                                        Official Sources & Page Citations ({citations.length})
+                                      </span>
+                                      {citations.map((c, i) => (
+                                        <CitationCard key={i} citation={c} />
+                                      ))}
+                                  </div>
+                                )}
 
-                        {/* Web Sources */}
-                        {webSources.length > 0 && (
-                          <div className="chat-citations-section">
-                            <span
-                              style={{
-                                fontSize: "11px",
-                                fontWeight: 700,
-                                color: "var(--text-secondary)",
-                                textTransform: "uppercase",
-                              }}
-                            >
-                              Official Web Sources ({webSources.length})
-                            </span>
-                            {webSources.map((w, i) => (
-                              <WebSourceCard key={i} source={w} />
-                            ))}
-                          </div>
-                        )}
+                                {/* Web Sources */}
+                                {webSources.length > 0 && (
+                                  <div className="chat-citations-section">
+                                      <span
+                                        style={{
+                                          fontSize: "11px",
+                                          fontWeight: 700,
+                                          color: "var(--text-secondary)",
+                                          textTransform: "uppercase",
+                                        }}
+                                      >
+                                        Official Web Sources ({webSources.length})
+                                      </span>
+                                      {webSources.map((w, i) => (
+                                        <WebSourceCard key={i} source={w} />
+                                      ))}
+                                  </div>
+                                )}
 
-                        {/* Disclaimer */}
-                        {disclaimer && (
-                          <div className="chat-disclaimer">
-                            <AlertCircle size={14} style={{ flexShrink: 0 }} />
-                            <span>{disclaimer}</span>
-                          </div>
-                        )}
+                                {/* Disclaimer */}
+                                {disclaimer && (
+                                  <div className="chat-disclaimer">
+                                    <AlertCircle size={14} style={{ flexShrink: 0 }} />
+                                    <span>{disclaimer}</span>
+                                  </div>
+                                )}
 
-                        {/* Actions: Pin, Copy & Feedback */}
-                        <div className="chat-actions-bar">
-                          <button
-                            className="chat-action-btn"
-                            onClick={() => handleTogglePin(msg)}
-                            title={isPinned(msg.id) ? "Unpin response" : "Pin response"}
-                            style={{
-                              color: isPinned(msg.id) ? "var(--accent-amber)" : "inherit",
-                              fontWeight: isPinned(msg.id) ? 700 : 500,
-                            }}
-                          >
-                            <Pin
-                              size={14}
-                              color={isPinned(msg.id) ? "var(--accent-amber)" : "currentColor"}
-                              fill={isPinned(msg.id) ? "var(--accent-amber)" : "none"}
-                            />
-                            {isPinned(msg.id) ? "Pinned" : "Pin"}
-                          </button>
+                                {/* Actions: Pin, Copy & Feedback */}
+                                <div className="chat-actions-bar">
+                                  <button
+                                    className="chat-action-btn"
+                                    onClick={() => handleTogglePin(msg)}
+                                    title={isPinned(msg.id) ? "Unpin response" : "Pin response"}
+                                    style={{
+                                      color: isPinned(msg.id) ? "var(--accent-amber)" : "inherit",
+                                      fontWeight: isPinned(msg.id) ? 700 : 500,
+                                    }}
+                                  >
+                                    <Pin
+                                      size={14}
+                                      color={isPinned(msg.id) ? "var(--accent-amber)" : "currentColor"}
+                                      fill={isPinned(msg.id) ? "var(--accent-amber)" : "none"}
+                                    />
+                                    {isPinned(msg.id) ? "Pinned" : "Pin"}
+                                  </button>
 
-                          <button
-                            className="chat-action-btn"
-                            onClick={() => handleCopy(msg.content, msg.id)}
-                            title="Copy answer"
-                          >
-                            {copiedMessageId === msg.id ? (
-                              <Check size={14} color="var(--accent-green)" />
-                            ) : (
-                              <Copy size={14} />
+                                  <button
+                                    className="chat-action-btn"
+                                    onClick={() => handleCopy(msg.content, msg.id)}
+                                    title="Copy answer"
+                                  >
+                                    {copiedMessageId === msg.id ? (
+                                      <Check size={14} color="var(--accent-green)" />
+                                    ) : (
+                                      <Copy size={14} />
+                                    )}
+                                    {copiedMessageId === msg.id ? "Copied" : "Copy"}
+                                  </button>
+
+                                  <button
+                                    className="chat-action-btn"
+                                    onClick={() => setFeedbackTarget({ messageId: msg.id, rating: 1 })}
+                                    title="Helpful response"
+                                  >
+                                    <ThumbsUp size={14} /> Helpful
+                                  </button>
+
+                                  <button
+                                    className="chat-action-btn"
+                                    onClick={() => setFeedbackTarget({ messageId: msg.id, rating: -1 })}
+                                    title="Inaccurate response"
+                                  >
+                                    <ThumbsDown size={14} /> Inaccurate
+                                  </button>
+                                </div>
+                              </div>
                             )}
-                            {copiedMessageId === msg.id ? "Copied" : "Copy"}
-                          </button>
-
-                          <button
-                            className="chat-action-btn"
-                            onClick={() => setFeedbackTarget({ messageId: msg.id, rating: 1 })}
-                            title="Helpful response"
-                          >
-                            <ThumbsUp size={14} /> Helpful
-                          </button>
-
-                          <button
-                            className="chat-action-btn"
-                            onClick={() => setFeedbackTarget({ messageId: msg.id, rating: -1 })}
-                            title="Inaccurate response"
-                          >
-                            <ThumbsDown size={14} /> Inaccurate
-                          </button>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                );
+                          </div>
+                          );
               })
             )}
 
-            {/* Loading Indicator */}
-            {loading && (
-              <div className="chat-bubble assistant">
-                <div className="chat-content-assistant" style={{ width: "fit-content" }}>
-                  <div className="typing-dots">
-                    <span className="typing-dot"></span>
-                    <span className="typing-dot"></span>
-                    <span className="typing-dot"></span>
-                  </div>
-                </div>
-              </div>
-            )}
-            <div ref={messagesEndRef} />
-          </div>
+                          {/* Loading Indicator */}
+                          {loading && (
+                            <div className="chat-bubble assistant">
+                              <div className="chat-content-assistant" style={{ width: "fit-content" }}>
+                                <div className="typing-dots">
+                                  <span className="typing-dot"></span>
+                                  <span className="typing-dot"></span>
+                                  <span className="typing-dot"></span>
+                                </div>
+                              </div>
+                            </div>
+                          )}
+                          <div ref={messagesEndRef} />
+                        </div>
 
           {/* Input Bar */}
-          <div className="chat-input-wrapper">
-            <form
-              className="chat-input-form"
-              onSubmit={(e) => {
-                e.preventDefault();
-                handleSendMessage();
-              }}
-            >
-              <textarea
-                className="chat-textarea"
-                rows={1}
-                value={inputQuery}
-                onChange={(e) => setInputQuery(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" && !e.shiftKey) {
-                    e.preventDefault();
-                    handleSendMessage();
-                  }
-                }}
-                placeholder={
-                  language === "Marathi"
-                    ? "आर्थिक किंवा कर विषयक प्रश्न विचारा... (उदा. नवीन कर रचना FY 2026-27)"
-                    : language === "Hindi"
-                    ? "वित्तीय या कर संबंधित प्रश्न पूछें... (उदा. नई कर व्यवस्था FY 2026-27)"
-                    : "Ask a financial regulation question... (e.g. RBI repo rate, 80C limits)"
-                }
-              />
-              <button
-                type="submit"
-                className="chat-send-btn"
-                disabled={!inputQuery.trim() || loading}
-                title="Send query"
-              >
-                <Send size={18} />
-              </button>
-            </form>
-          </div>
-        </main>
-      </div>
+                      <div className="chat-input-wrapper">
+                        <form
+                          className="chat-input-form"
+                          onSubmit={(e) => {
+                            e.preventDefault();
+                            handleSendMessage();
+                          }}
+                        >
+                          <textarea
+                            className="chat-textarea"
+                            rows={1}
+                            value={inputQuery}
+                            onChange={(e) => setInputQuery(e.target.value)}
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter" && !e.shiftKey) {
+                                e.preventDefault();
+                                handleSendMessage();
+                              }
+                            }}
+                            placeholder={
+                              language === "Marathi"
+                                ? "आर्थिक किंवा कर विषयक प्रश्न विचारा... (उदा. नवीन कर रचना FY 2026-27)"
+                                : language === "Hindi"
+                                  ? "वित्तीय या कर संबंधित प्रश्न पूछें... (उदा. नई कर व्यवस्था FY 2026-27)"
+                                  : "Ask a financial regulation question... (e.g. RBI repo rate, 80C limits)"
+                            }
+                          />
+                          <button
+                            type="submit"
+                            className="chat-send-btn"
+                            disabled={!inputQuery.trim() || loading}
+                            title="Send query"
+                          >
+                            <Send size={18} />
+                          </button>
+                        </form>
+                      </div>
+                    </main>
+                  </div>
 
       {/* --- ALL WORKING MODALS --- */}
 
-      {/* 1. Settings Modal (Includes all 8 tabs: Profile, Password, Theme, Language, Chat Prefs, Privacy, Delete History, Notification Prefs) */}
-      <SettingsModal
-        isOpen={activeModal === "settings"}
-        onClose={() => setActiveModal(null)}
-        initialTab={settingsInitialTab}
-        onDeleteAllSessions={handleDeleteAllSessions}
-        onLanguageChange={(newLang) => setLanguage(newLang)}
-      />
+                {/* 1. Settings Modal (Includes all 8 tabs: Profile, Password, Theme, Language, Chat Prefs, Privacy, Delete History, Notification Prefs) */}
+                <SettingsModal
+                  isOpen={activeModal === "settings"}
+                  onClose={() => setActiveModal(null)}
+                  initialTab={settingsInitialTab}
+                  onDeleteAllSessions={handleDeleteAllSessions}
+                  onLanguageChange={(newLang) => setLanguage(newLang)}
+                />
 
-      {/* 2. My Documents Modal */}
-      <MyDocumentsModal
-        isOpen={activeModal === "documents"}
-        onClose={() => setActiveModal(null)}
-      />
+                {/* 2. My Documents Modal */}
+                <MyDocumentsModal
+                  isOpen={activeModal === "documents"}
+                  onClose={() => setActiveModal(null)}
+                />
 
-      {/* 3. Financial Insights Modal */}
-      <FinancialInsightsModal
-        isOpen={activeModal === "insights"}
-        onClose={() => setActiveModal(null)}
-      />
+                {/* 3. Financial Insights Modal */}
+                <FinancialInsightsModal
+                  isOpen={activeModal === "insights"}
+                  onClose={() => setActiveModal(null)}
+                />
 
-      {/* 4. Pinned Answers Modal */}
-      <PinnedAnswersModal
-        isOpen={activeModal === "pinned"}
-        onClose={() => setActiveModal(null)}
-        pinnedAnswers={pinnedAnswers}
-        onUnpin={handleUnpin}
-      />
+                {/* 4. Pinned Answers Modal */}
+                <PinnedAnswersModal
+                  isOpen={activeModal === "pinned"}
+                  onClose={() => setActiveModal(null)}
+                  pinnedAnswers={pinnedAnswers}
+                  onUnpin={handleUnpin}
+                />
 
-      {/* 5. Notifications Modal */}
-      <NotificationsModal
-        isOpen={activeModal === "notifications"}
-        onClose={() => setActiveModal(null)}
-        notifications={notifications}
-        onMarkRead={handleMarkNotifRead}
-        onMarkAllRead={handleMarkAllNotifsRead}
-        onClearAll={handleClearAllNotifs}
-      />
+                {/* 5. Notifications Modal */}
+                <NotificationsModal
+                  isOpen={activeModal === "notifications"}
+                  onClose={() => setActiveModal(null)}
+                  notifications={notifications}
+                  onMarkRead={handleMarkNotifRead}
+                  onMarkAllRead={handleMarkAllNotifsRead}
+                  onClearAll={handleClearAllNotifs}
+                />
 
-      {/* 6. Help & Support Modal */}
-      <HelpSupportModal
-        isOpen={activeModal === "help"}
-        onClose={() => setActiveModal(null)}
-      />
+                {/* 6. Help & Support Modal */}
+                <HelpSupportModal
+                  isOpen={activeModal === "help"}
+                  onClose={() => setActiveModal(null)}
+                />
 
-      {/* 7. About FinanceAI Modal */}
-      <AboutModal
-        isOpen={activeModal === "about"}
-        onClose={() => setActiveModal(null)}
-      />
+                {/* 7. About FinanceAI Modal */}
+                <AboutModal
+                  isOpen={activeModal === "about"}
+                  onClose={() => setActiveModal(null)}
+                />
 
-      {/* 8. Feedback Modal */}
-      {feedbackTarget && (
-        <FeedbackModal
-          messageId={feedbackTarget.messageId}
-          initialRating={feedbackTarget.rating}
-          onClose={() => setFeedbackTarget(null)}
-          onSubmit={handleFeedbackSubmit}
-        />
-      )}
-    </div>
-  );
+                {/* 8. Feedback Modal */}
+                {feedbackTarget && (
+                  <FeedbackModal
+                    messageId={feedbackTarget.messageId}
+                    initialRating={feedbackTarget.rating}
+                    onClose={() => setFeedbackTarget(null)}
+                    onSubmit={handleFeedbackSubmit}
+                  />
+                )}
+              </div>
+              );
 };
