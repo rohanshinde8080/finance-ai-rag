@@ -129,6 +129,29 @@ def get_session(
     return session
 
 @router.delete(
+    "/sessions",
+    summary="Delete all conversation sessions for current user"
+)
+def delete_all_sessions(
+    current_user: Dict[str, Any] = Depends(get_current_user)
+):
+    """
+    Deletes all conversation sessions and associated messages for the user.
+    """
+    user_id = current_user["id"]
+
+    with get_db_cursor() as cur:
+        cur.execute(
+            "DELETE FROM chat_sessions WHERE user_id = %s RETURNING id;",
+            (user_id,)
+        )
+        deleted_rows = cur.fetchall()
+
+    deleted_count = len(deleted_rows)
+    logger.info(f"User {current_user['email']} deleted all {deleted_count} conversation sessions.")
+    return {"message": f"Successfully deleted {deleted_count} conversation sessions.", "deleted_count": deleted_count}
+
+@router.delete(
     "/sessions/{session_id}",
     summary="Delete a conversation session and all its messages"
 )
@@ -216,7 +239,7 @@ def ask_question(
         user_message_id = cur.fetchone()["id"]
 
     # Step 3: Execute RAG Orchestration
-    rag_result = answer_financial_query(question, category=request.category)
+    rag_result = answer_financial_query(question, category=request.category, language=request.language)
 
     # Step 4: Persist assistant message with citations & confidence metadata
     citations_data = [c.model_dump() for c in rag_result.citations]

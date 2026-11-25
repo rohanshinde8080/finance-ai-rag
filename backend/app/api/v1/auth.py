@@ -6,7 +6,9 @@ from app.models.auth import (
     UserLoginRequest,
     TokenResponse,
     UserResponse,
-    MessageResponse
+    MessageResponse,
+    UserProfileUpdateRequest,
+    UserChangePasswordRequest
 )
 from app.core.security import hash_password, verify_password, create_access_token
 from app.core.dependencies import get_current_user
@@ -137,4 +139,74 @@ def logout(current_user: Dict[str, Any] = Depends(get_current_user)):
     """
     logger.info(f"User logged out: {current_user.get('email')}")
     return MessageResponse(message="Successfully logged out.")
+
+@router.put(
+    "/profile",
+    response_model=UserResponse,
+    summary="Update current authenticated user's profile"
+)
+def update_profile(
+    request: UserProfileUpdateRequest,
+    current_user: Dict[str, Any] = Depends(get_current_user)
+):
+    """
+    Updates the authenticated user's profile:
+    Full name, gender, mobile number, date of birth.
+    """
+    user_id = current_user["id"]
+    new_name = request.full_name.strip() if request.full_name else current_user["full_name"]
+    new_gender = request.gender if request.gender is not None else current_user.get("gender")
+    new_mobile = request.mobile_number if request.mobile_number is not None else current_user.get("mobile_number")
+    new_dob = request.date_of_birth if request.date_of_birth is not None else current_user.get("date_of_birth")
+
+    with get_db_cursor() as cur:
+        cur.execute(
+            """
+            UPDATE users
+            SET full_name = %s,
+                gender = %s,
+                mobile_number = %s,
+                date_of_birth = %s,
+                updated_at = NOW()
+            WHERE id = %s
+            RETURNING id, email, full_name, role, is_active, gender, mobile_number, date_of_birth, created_at;
+            """,
+            (new_name, new_gender, new_mobile, new_dob, user_id)
+        )
+        updated_user = cur.fetchone()
+
+    logger.info(f"User profile updated: {updated_user['email']} (ID: {user_id})")
+    return updated_user
+
+@router.put(
+    "/change-password",
+    response_model=MessageResponse,
+    summary="Change user password"
+)
+def change_password(
+    request: UserChangePasswordRequest,
+    current_user: Dict[str, Any] = Depends(get_current_user)
+):
+    """
+    Updates user password after verifying the existing password.
+    """
+    user_id = current_user["id"]
+
+    with get_db_cursor() as cur:
+        cur.execute("SELECT password_hash FROM users WHERE id = %s;", (user_id,))
+        row = cur.fetchone()
+        if not row or not verify_password(request.current_password, row["password_hash"]):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Current password verification failed. Please check your current password."
+            )
+
+        new_hash = hash_password(request.new_password)
+        cur.execute(
+            "UPDATE users SET password_hash = %s, updated_at = NOW() WHERE id = %s;",
+            (new_hash, user_id)
+        )
+
+    logger.info(f"Password successfully changed for user: {current_user['email']}")
+    return MessageResponse(message="Password changed successfully.")
 

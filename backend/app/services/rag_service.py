@@ -12,7 +12,8 @@ from app.utils.logger import logger
 
 def answer_financial_query(
     question: str,
-    category: Optional[str] = None
+    category: Optional[str] = None,
+    language: Optional[str] = "English"
 ) -> RAGResponse:
     """
     Master RAG Orchestrator:
@@ -39,7 +40,7 @@ def answer_financial_query(
     if chunks and max_similarity >= settings.SIMILARITY_THRESHOLD:
         logger.info(f"Relevance score ({max_similarity:.4f}) meets threshold ({settings.SIMILARITY_THRESHOLD}). Routing to Document Grounding.")
         
-        answer_text = generate_document_grounded_answer(question, chunks)
+        answer_text = generate_document_grounded_answer(question, chunks, language=language)
         
         # Build document citations
         citations = [
@@ -70,7 +71,7 @@ def answer_financial_query(
     web_results = search_official_web(query=question, max_results=4)
 
     if web_results:
-        answer_text = generate_web_grounded_answer(question, web_results)
+        answer_text = generate_web_grounded_answer(question, web_results, language=language)
         
         web_sources = [
             WebSourceCitation(

@@ -46,6 +46,17 @@ export const AuthProvider = ({ children }) => {
     return await authService.register(...args);
   };
 
+  const updateProfile = async (profileData) => {
+    const updated = await authService.updateProfile(profileData);
+    setUser(updated);
+    localStorage.setItem("finance_ai_user", JSON.stringify(updated));
+    return updated;
+  };
+
+  const changePassword = async (currentPassword, newPassword) => {
+    return await authService.changePassword(currentPassword, newPassword);
+  };
+
   const logout = async () => {
     try {
       await authService.logout();
@@ -70,6 +81,8 @@ export const AuthProvider = ({ children }) => {
         isAdmin,
         login,
         register,
+        updateProfile,
+        changePassword,
         logout,
         isAuthenticated: !!token && !!user,
       }}

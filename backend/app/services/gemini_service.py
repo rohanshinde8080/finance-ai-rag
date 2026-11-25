@@ -52,10 +52,21 @@ def get_gemini_client() -> Optional[genai.Client]:
             return None
     return _gemini_client
 
+def get_language_directive(language: Optional[str]) -> str:
+    """Returns explicit language instructions for the LLM."""
+    if not language or language.lower() in ["english", "en"]:
+        return ""
+    if language.lower() in ["marathi", "mr"]:
+        return "\n\nCRITICAL LANGUAGE REQUIREMENT: You MUST formulate, explain, and write your ENTIRE response in MARATHI (मराठी) using the Devanagari script. Ensure financial concepts and rules are explained clearly in fluent, natural Marathi."
+    if language.lower() in ["hindi", "hi"]:
+        return "\n\nCRITICAL LANGUAGE REQUIREMENT: You MUST formulate, explain, and write your ENTIRE response in HINDI (हिंदी) using the Devanagari script. Ensure financial concepts and rules are explained clearly in fluent, natural Hindi."
+    return ""
+
 def generate_document_grounded_answer(
     question: str,
     context_chunks: List[Dict[str, Any]],
-    model_name: Optional[str] = None
+    model_name: Optional[str] = None,
+    language: Optional[str] = "English"
 ) -> str:
     """
     Generates an answer grounded strictly in retrieved financial document chunks.
@@ -97,6 +108,9 @@ Please provide a clear, factual answer based strictly on the above excerpts, cit
     seen = set()
     models_to_try = [m for m in candidate_models if not (m in seen or seen.add(m))]
 
+    lang_directive = get_language_directive(language)
+    system_inst = DOCUMENT_SYSTEM_INSTRUCTION + lang_directive
+
     last_err = None
     for target_model in models_to_try:
         try:
@@ -105,7 +119,7 @@ Please provide a clear, factual answer based strictly on the above excerpts, cit
                 model=target_model,
                 contents=user_prompt,
                 config=types.GenerateContentConfig(
-                    system_instruction=DOCUMENT_SYSTEM_INSTRUCTION,
+                    system_instruction=system_inst,
                     temperature=0.2,
                     max_output_tokens=1500
                 )
@@ -120,7 +134,8 @@ Please provide a clear, factual answer based strictly on the above excerpts, cit
 def generate_web_grounded_answer(
     question: str,
     web_sources: List[Dict[str, Any]],
-    model_name: Optional[str] = None
+    model_name: Optional[str] = None,
+    language: Optional[str] = "English"
 ) -> str:
     """
     Generates an answer grounded in verified official regulatory web search snippets.
@@ -162,6 +177,9 @@ Please synthesize an informative response referencing the official sources and v
     seen = set()
     models_to_try = [m for m in candidate_models if not (m in seen or seen.add(m))]
 
+    lang_directive = get_language_directive(language)
+    system_inst = WEB_SYSTEM_INSTRUCTION + lang_directive
+
     last_err = None
     for target_model in models_to_try:
         try:
@@ -170,7 +188,7 @@ Please synthesize an informative response referencing the official sources and v
                 model=target_model,
                 contents=user_prompt,
                 config=types.GenerateContentConfig(
-                    system_instruction=WEB_SYSTEM_INSTRUCTION,
+                    system_instruction=system_inst,
                     temperature=0.2,
                     max_output_tokens=1500
                 )

@@ -4,8 +4,15 @@ import { Sidebar } from "../components/Sidebar";
 import { CitationCard } from "../components/CitationCard";
 import { WebSourceCard } from "../components/WebSourceCard";
 import { FeedbackModal } from "../components/FeedbackModal";
+import { SettingsModal } from "../components/SettingsModal";
+import { MyDocumentsModal } from "../components/MyDocumentsModal";
+import { FinancialInsightsModal } from "../components/FinancialInsightsModal";
+import { PinnedAnswersModal } from "../components/PinnedAnswersModal";
+import { NotificationsModal } from "../components/NotificationsModal";
+import { HelpSupportModal } from "../components/HelpSupportModal";
+import { AboutModal } from "../components/AboutModal";
 import { chatService } from "../services/chatService";
-import { Send, Copy, ThumbsUp, ThumbsDown, Check, AlertCircle, Sparkles } from "lucide-react";
+import { Send, Copy, ThumbsUp, ThumbsDown, Check, AlertCircle, Sparkles, Pin } from "lucide-react";
 import "../styles/chat.css";
 
 const SUGGESTED_PROMPTS = [
@@ -25,6 +32,68 @@ export const ChatInterface = () => {
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [copiedMessageId, setCopiedMessageId] = useState(null);
   const [feedbackTarget, setFeedbackTarget] = useState(null);
+
+  // --- Modal Navigation State ---
+  const [activeModal, setActiveModal] = useState(null); // 'settings', 'documents', 'insights', 'pinned', 'notifications', 'help', 'about'
+  const [settingsInitialTab, setSettingsInitialTab] = useState("profile");
+
+  // --- Language State ---
+  const [language, setLanguage] = useState(() => localStorage.getItem("finance_ai_lang") || "English");
+
+  // --- Theme Initializer ---
+  useEffect(() => {
+    const savedTheme = localStorage.getItem("finance_ai_theme") || "light";
+    document.documentElement.setAttribute("data-theme", savedTheme);
+  }, []);
+
+  // --- Pinned Answers State ---
+  const [pinnedAnswers, setPinnedAnswers] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem("finance_ai_pinned_answers") || "[]");
+    } catch {
+      return [];
+    }
+  });
+
+  // --- Notifications State ---
+  const [notifications, setNotifications] = useState(() => {
+    const saved = localStorage.getItem("finance_ai_notifications");
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch {}
+    }
+    return [
+      {
+        id: "notif-1",
+        title: "Advance Tax 4th Installment Reminder",
+        message: "The final installment (100%) of Advance Tax for FY 2026-27 is due on or before March 15. Check your tax computation in Financial Insights.",
+        time: "Today",
+        read: false,
+      },
+      {
+        id: "notif-2",
+        title: "RBI MPC Policy Rate Decision",
+        message: "The Monetary Policy Committee has retained the policy repo rate at 6.50% to anchor medium-term retail inflation expectations.",
+        time: "Yesterday",
+        read: false,
+      },
+      {
+        id: "notif-3",
+        title: "New Tax Regime Standard Deduction",
+        message: "Under Section 115BAC, the standard deduction for salaried individuals is enhanced to ₹75,000. Taxable income up to ₹7 Lakhs incurs zero tax with Section 87A rebate.",
+        time: "3 days ago",
+        read: true,
+      },
+      {
+        id: "notif-4",
+        title: "SEBI Derivative Margin Requirements",
+        message: "SEBI framework mandates minimum contract size of ₹15 Lakhs on index options to limit retail speculative risk.",
+        time: "1 week ago",
+        read: true,
+      },
+    ];
+  });
 
   const messagesEndRef = useRef(null);
 
@@ -77,6 +146,12 @@ export const ChatInterface = () => {
     }
   };
 
+  const handleDeleteAllSessions = () => {
+    setSessions([]);
+    setActiveSessionId(null);
+    setMessages([]);
+  };
+
   const handleSendMessage = async (queryText) => {
     const textToSend = queryText || inputQuery;
     if (!textToSend.trim() || loading) return;
@@ -99,7 +174,8 @@ export const ChatInterface = () => {
       const res = await chatService.askQuestion(
         activeSessionId,
         textToSend,
-        selectedCategory
+        selectedCategory,
+        language
       );
 
       // If new session created on the fly
@@ -119,6 +195,7 @@ export const ChatInterface = () => {
           web_sources: res.web_sources,
           confidence_score: res.confidence_score,
           disclaimer: res.disclaimer,
+          question: textToSend,
         },
         created_at: res.created_at,
       };
@@ -149,6 +226,72 @@ export const ChatInterface = () => {
     await chatService.submitFeedback(messageId, rating, comments);
   };
 
+  // --- Pinned Answers Actions ---
+  const handleTogglePin = (assistantMsg) => {
+    const alreadyPinned = pinnedAnswers.some((p) => p.id === assistantMsg.id);
+    let updated;
+    if (alreadyPinned) {
+      updated = pinnedAnswers.filter((p) => p.id !== assistantMsg.id);
+    } else {
+      // Find corresponding user question
+      const msgIndex = messages.findIndex((m) => m.id === assistantMsg.id);
+      let userQuery = "Financial Query";
+      if (msgIndex > 0 && messages[msgIndex - 1].sender === "user") {
+        userQuery = messages[msgIndex - 1].content;
+      } else if (assistantMsg.metadata?.question) {
+        userQuery = assistantMsg.metadata.question;
+      }
+
+      const item = {
+        id: assistantMsg.id,
+        question: userQuery,
+        answer: assistantMsg.content,
+        citations: assistantMsg.metadata?.citations || [],
+        source_type: assistantMsg.source_type,
+        pinned_at: new Date().toISOString(),
+      };
+      updated = [item, ...pinnedAnswers];
+    }
+    setPinnedAnswers(updated);
+    localStorage.setItem("finance_ai_pinned_answers", JSON.stringify(updated));
+  };
+
+  const handleUnpin = (pinId) => {
+    const updated = pinnedAnswers.filter((p) => p.id !== pinId);
+    setPinnedAnswers(updated);
+    localStorage.setItem("finance_ai_pinned_answers", JSON.stringify(updated));
+  };
+
+  const isPinned = (msgId) => pinnedAnswers.some((p) => p.id === msgId);
+
+  // --- Notifications Actions ---
+  const handleMarkNotifRead = (id) => {
+    const updated = notifications.map((n) => (n.id === id ? { ...n, read: true } : n));
+    setNotifications(updated);
+    localStorage.setItem("finance_ai_notifications", JSON.stringify(updated));
+  };
+
+  const handleMarkAllNotifsRead = () => {
+    const updated = notifications.map((n) => ({ ...n, read: true }));
+    setNotifications(updated);
+    localStorage.setItem("finance_ai_notifications", JSON.stringify(updated));
+  };
+
+  const handleClearAllNotifs = () => {
+    setNotifications([]);
+    localStorage.setItem("finance_ai_notifications", JSON.stringify([]));
+  };
+
+  const unreadNotifCount = notifications.filter((n) => !n.read).length;
+
+  // Open modal handler from sidebar
+  const handleOpenModal = (modalName, initialTab = "profile") => {
+    if (modalName === "settings") {
+      setSettingsInitialTab(initialTab);
+    }
+    setActiveModal(modalName);
+  };
+
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100vh" }}>
       <Navbar />
@@ -162,24 +305,36 @@ export const ChatInterface = () => {
           onDeleteSession={handleDeleteSession}
           selectedCategory={selectedCategory}
           onSelectCategory={setSelectedCategory}
+          onOpenModal={handleOpenModal}
+          pinnedCount={pinnedAnswers.length}
+          unreadNotifCount={unreadNotifCount}
         />
 
         <main className="chat-main">
           {selectedCategory && (
-            <div style={{
-              background: "rgba(0, 141, 218, 0.08)",
-              borderBottom: "1px solid rgba(0, 141, 218, 0.2)",
-              padding: "6px 24px",
-              fontSize: "12px",
-              color: "var(--accent-blue)",
-              display: "flex",
-              alignItems: "center",
-              gap: "8px"
-            }}>
-              <span>Domain Filter Applied: <strong>{selectedCategory}</strong></span>
+            <div
+              style={{
+                background: "rgba(0, 141, 218, 0.08)",
+                borderBottom: "1px solid rgba(0, 141, 218, 0.2)",
+                padding: "6px 24px",
+                fontSize: "12px",
+                color: "var(--accent-blue)",
+                display: "flex",
+                alignItems: "center",
+                gap: "8px",
+              }}
+            >
+              <span>
+                Domain Filter Applied: <strong>{selectedCategory}</strong>
+              </span>
               <button
                 onClick={() => setSelectedCategory(null)}
-                style={{ background: "transparent", color: "var(--accent-blue)", textDecoration: "underline", fontSize: "11px" }}
+                style={{
+                  background: "transparent",
+                  color: "var(--accent-blue)",
+                  textDecoration: "underline",
+                  fontSize: "11px",
+                }}
               >
                 Clear
               </button>
@@ -189,18 +344,20 @@ export const ChatInterface = () => {
           <div className="chat-messages-container">
             {messages.length === 0 ? (
               <div style={{ margin: "auto", maxWidth: "680px", textAlign: "center", padding: "40px 20px" }}>
-                <div style={{
-                  width: "56px",
-                  height: "56px",
-                  background: "linear-gradient(135deg, var(--accent-blue), var(--primary-navy))",
-                  color: "#FFF",
-                  borderRadius: "var(--radius-lg)",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  margin: "0 auto 16px auto",
-                  boxShadow: "var(--shadow-md)"
-                }}>
+                <div
+                  style={{
+                    width: "56px",
+                    height: "56px",
+                    background: "linear-gradient(135deg, var(--accent-blue), var(--primary-navy))",
+                    color: "#FFF",
+                    borderRadius: "var(--radius-lg)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    margin: "0 auto 16px auto",
+                    boxShadow: "var(--shadow-md)",
+                  }}
+                >
                   <Sparkles size={28} />
                 </div>
                 <h2 style={{ fontSize: "24px", fontWeight: 800, color: "var(--primary-navy)", marginBottom: "8px" }}>
@@ -238,28 +395,32 @@ export const ChatInterface = () => {
                         {/* Grounding Source Badge */}
                         <div style={{ marginBottom: "10px" }}>
                           {msg.source_type === "document" && (
-                            <span style={{
-                              background: "rgba(16, 185, 129, 0.12)",
-                              color: "var(--accent-green)",
-                              padding: "3px 8px",
-                              borderRadius: "var(--radius-full)",
-                              fontSize: "11px",
-                              fontWeight: 700,
-                              textTransform: "uppercase"
-                            }}>
+                            <span
+                              style={{
+                                background: "rgba(16, 185, 129, 0.12)",
+                                color: "var(--accent-green)",
+                                padding: "3px 8px",
+                                borderRadius: "var(--radius-full)",
+                                fontSize: "11px",
+                                fontWeight: 700,
+                                textTransform: "uppercase",
+                              }}
+                            >
                               ✓ Document Grounded (Deterministic)
                             </span>
                           )}
                           {msg.source_type === "web" && (
-                            <span style={{
-                              background: "rgba(245, 158, 11, 0.12)",
-                              color: "var(--accent-amber)",
-                              padding: "3px 8px",
-                              borderRadius: "var(--radius-full)",
-                              fontSize: "11px",
-                              fontWeight: 700,
-                              textTransform: "uppercase"
-                            }}>
+                            <span
+                              style={{
+                                background: "rgba(245, 158, 11, 0.12)",
+                                color: "var(--accent-amber)",
+                                padding: "3px 8px",
+                                borderRadius: "var(--radius-full)",
+                                fontSize: "11px",
+                                fontWeight: 700,
+                                textTransform: "uppercase",
+                              }}
+                            >
                               🌐 Verified Web Fallback (Official Portals)
                             </span>
                           )}
@@ -273,7 +434,14 @@ export const ChatInterface = () => {
                         {/* Document Citations */}
                         {citations.length > 0 && (
                           <div className="chat-citations-section">
-                            <span style={{ fontSize: "11px", fontWeight: 700, color: "var(--text-secondary)", textTransform: "uppercase" }}>
+                            <span
+                              style={{
+                                fontSize: "11px",
+                                fontWeight: 700,
+                                color: "var(--text-secondary)",
+                                textTransform: "uppercase",
+                              }}
+                            >
                               Official Sources & Page Citations ({citations.length})
                             </span>
                             {citations.map((c, i) => (
@@ -285,7 +453,14 @@ export const ChatInterface = () => {
                         {/* Web Sources */}
                         {webSources.length > 0 && (
                           <div className="chat-citations-section">
-                            <span style={{ fontSize: "11px", fontWeight: 700, color: "var(--text-secondary)", textTransform: "uppercase" }}>
+                            <span
+                              style={{
+                                fontSize: "11px",
+                                fontWeight: 700,
+                                color: "var(--text-secondary)",
+                                textTransform: "uppercase",
+                              }}
+                            >
                               Official Web Sources ({webSources.length})
                             </span>
                             {webSources.map((w, i) => (
@@ -302,14 +477,35 @@ export const ChatInterface = () => {
                           </div>
                         )}
 
-                        {/* Actions: Copy & Feedback */}
+                        {/* Actions: Pin, Copy & Feedback */}
                         <div className="chat-actions-bar">
+                          <button
+                            className="chat-action-btn"
+                            onClick={() => handleTogglePin(msg)}
+                            title={isPinned(msg.id) ? "Unpin response" : "Pin response"}
+                            style={{
+                              color: isPinned(msg.id) ? "var(--accent-amber)" : "inherit",
+                              fontWeight: isPinned(msg.id) ? 700 : 500,
+                            }}
+                          >
+                            <Pin
+                              size={14}
+                              color={isPinned(msg.id) ? "var(--accent-amber)" : "currentColor"}
+                              fill={isPinned(msg.id) ? "var(--accent-amber)" : "none"}
+                            />
+                            {isPinned(msg.id) ? "Pinned" : "Pin"}
+                          </button>
+
                           <button
                             className="chat-action-btn"
                             onClick={() => handleCopy(msg.content, msg.id)}
                             title="Copy answer"
                           >
-                            {copiedMessageId === msg.id ? <Check size={14} color="var(--accent-green)" /> : <Copy size={14} />}
+                            {copiedMessageId === msg.id ? (
+                              <Check size={14} color="var(--accent-green)" />
+                            ) : (
+                              <Copy size={14} />
+                            )}
                             {copiedMessageId === msg.id ? "Copied" : "Copy"}
                           </button>
 
@@ -371,12 +567,18 @@ export const ChatInterface = () => {
                     handleSendMessage();
                   }
                 }}
-                placeholder="Ask a financial regulation question (e.g., Section 80C limits, Repo rate, GST exemptions)..."
+                placeholder={
+                  language === "Marathi"
+                    ? "आर्थिक किंवा कर विषयक प्रश्न विचारा... (उदा. नवीन कर रचना FY 2026-27)"
+                    : language === "Hindi"
+                    ? "वित्तीय या कर संबंधित प्रश्न पूछें... (उदा. नई कर व्यवस्था FY 2026-27)"
+                    : "Ask a financial regulation question... (e.g. RBI repo rate, 80C limits)"
+                }
               />
               <button
                 type="submit"
-                disabled={!inputQuery.trim() || loading}
                 className="chat-send-btn"
+                disabled={!inputQuery.trim() || loading}
                 title="Send query"
               >
                 <Send size={18} />
@@ -386,6 +588,60 @@ export const ChatInterface = () => {
         </main>
       </div>
 
+      {/* --- ALL WORKING MODALS --- */}
+
+      {/* 1. Settings Modal (Includes all 8 tabs: Profile, Password, Theme, Language, Chat Prefs, Privacy, Delete History, Notification Prefs) */}
+      <SettingsModal
+        isOpen={activeModal === "settings"}
+        onClose={() => setActiveModal(null)}
+        initialTab={settingsInitialTab}
+        onDeleteAllSessions={handleDeleteAllSessions}
+        onLanguageChange={(newLang) => setLanguage(newLang)}
+      />
+
+      {/* 2. My Documents Modal */}
+      <MyDocumentsModal
+        isOpen={activeModal === "documents"}
+        onClose={() => setActiveModal(null)}
+      />
+
+      {/* 3. Financial Insights Modal */}
+      <FinancialInsightsModal
+        isOpen={activeModal === "insights"}
+        onClose={() => setActiveModal(null)}
+      />
+
+      {/* 4. Pinned Answers Modal */}
+      <PinnedAnswersModal
+        isOpen={activeModal === "pinned"}
+        onClose={() => setActiveModal(null)}
+        pinnedAnswers={pinnedAnswers}
+        onUnpin={handleUnpin}
+      />
+
+      {/* 5. Notifications Modal */}
+      <NotificationsModal
+        isOpen={activeModal === "notifications"}
+        onClose={() => setActiveModal(null)}
+        notifications={notifications}
+        onMarkRead={handleMarkNotifRead}
+        onMarkAllRead={handleMarkAllNotifsRead}
+        onClearAll={handleClearAllNotifs}
+      />
+
+      {/* 6. Help & Support Modal */}
+      <HelpSupportModal
+        isOpen={activeModal === "help"}
+        onClose={() => setActiveModal(null)}
+      />
+
+      {/* 7. About FinanceAI Modal */}
+      <AboutModal
+        isOpen={activeModal === "about"}
+        onClose={() => setActiveModal(null)}
+      />
+
+      {/* 8. Feedback Modal */}
       {feedbackTarget && (
         <FeedbackModal
           messageId={feedbackTarget.messageId}
@@ -397,4 +653,3 @@ export const ChatInterface = () => {
     </div>
   );
 };
-

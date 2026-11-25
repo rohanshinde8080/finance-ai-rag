@@ -69,3 +69,34 @@ class MessageResponse(BaseModel):
     """Generic status response schema."""
     message: str
     detail: Optional[str] = None
+
+class UserProfileUpdateRequest(BaseModel):
+    """Schema for updating personal user profile details."""
+    full_name: Optional[str] = Field(None, min_length=2, max_length=150)
+    gender: Optional[str] = Field(None, max_length=50)
+    mobile_number: Optional[str] = Field(None, max_length=20)
+    date_of_birth: Optional[str] = Field(None)
+
+    @field_validator("gender", "mobile_number", "date_of_birth", mode="before")
+    @classmethod
+    def clean_optional(cls, v: Any) -> Optional[str]:
+        if v is None:
+            return None
+        if isinstance(v, str):
+            s = v.strip()
+            return s if s else None
+        return str(v)
+
+class UserChangePasswordRequest(BaseModel):
+    """Schema for updating user password."""
+    current_password: str = Field(..., description="Current active password")
+    new_password: str = Field(..., min_length=8, max_length=128, description="New secure password")
+
+    @field_validator("new_password")
+    @classmethod
+    def validate_new_pwd(cls, v: str) -> str:
+        if len(v) < 8:
+            raise ValueError("New password must be at least 8 characters long.")
+        if not re.search(r"\d", v) and not re.search(r"[!@#$%^&*(),.?\":{}|<>]", v):
+            raise ValueError("New password must contain at least one digit or special character.")
+        return v

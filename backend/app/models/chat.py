@@ -38,6 +38,7 @@ class ChatAskRequest(BaseModel):
     session_id: Optional[UUID] = None
     question: str = Field(..., min_length=2, max_length=1000, description="User financial question")
     category: Optional[str] = Field(None, description="Optional category filter")
+    language: Optional[str] = Field("English", description="Response language: English, Marathi, Hindi")
 
 class ChatMessageItem(BaseModel):
     """Message item in a chat session."""

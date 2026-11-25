@@ -21,11 +21,17 @@ export const chatService = {
     return response.data;
   },
 
-  async askQuestion(sessionId, question, category = null) {
+  async deleteAllSessions() {
+    const response = await api.delete("/chat/sessions");
+    return response.data;
+  },
+
+  async askQuestion(sessionId, question, category = null, language = "English") {
     const response = await api.post("/chat/ask", {
       session_id: sessionId || null,
       question,
       category: category || null,
+      language: language || "English",
     });
     return response.data;
   },
