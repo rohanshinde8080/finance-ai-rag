@@ -63,12 +63,20 @@ app.add_middleware(
 @app.exception_handler(Exception)
 async def global_exception_handler(request: Request, exc: Exception):
     logger.error(f"Unhandled Exception on {request.method} {request.url.path}: {exc}", exc_info=True)
+    origin = request.headers.get("origin")
+    headers = {}
+    if origin:
+        headers["Access-Control-Allow-Origin"] = origin
+        headers["Access-Control-Allow-Credentials"] = "true"
+        headers["Access-Control-Allow-Headers"] = "*"
+        headers["Access-Control-Allow-Methods"] = "*"
     return JSONResponse(
         status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
         content={
             "detail": "An internal server error occurred. Please contact the administrator.",
             "error_type": type(exc).__name__
-        }
+        },
+        headers=headers
     )
 
 # Root & Health Endpoints
