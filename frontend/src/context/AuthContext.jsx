@@ -20,11 +20,17 @@ export const AuthProvider = ({ children }) => {
           setUser(profile);
           localStorage.setItem("finance_ai_user", JSON.stringify(profile));
         } catch (err) {
-          console.warn("Session verification failed, logging out:", err);
-          setUser(null);
-          setToken(null);
-          localStorage.removeItem("finance_ai_token");
-          localStorage.removeItem("finance_ai_user");
+          // Only invalidate session if the backend explicitly returned 401 Unauthorized
+          if (err.response && err.response.status === 401) {
+            console.warn("Session expired or token invalid, logging out:", err);
+            setUser(null);
+            setToken(null);
+            localStorage.removeItem("finance_ai_token");
+            localStorage.removeItem("finance_ai_user");
+          } else {
+            // Transient network error or backend cold starting: retain cached user profile
+            console.warn("Network error during session verification, keeping cached profile:", err);
+          }
         }
       }
       setLoading(false);
