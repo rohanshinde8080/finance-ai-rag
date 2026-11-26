@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { ShieldAlert, Eye, EyeOff, Sparkles } from "lucide-react";
+import { Eye, EyeOff, Sparkles, Shield } from "lucide-react";
 import { getErrorMessage } from "../utils/errorHandler";
 import "../styles/auth.css";
 
@@ -47,14 +47,29 @@ export const AdminLogin = () => {
   };
 
   return (
-    <div className="auth-container" style={{ background: "linear-gradient(135deg, #050C17 0%, #0F2542 100%)" }}>
-      <div className="auth-card" style={{ borderTop: "4px solid var(--accent-green)" }}>
+    <div className="auth-container">
+      <div className="auth-card">
         <div className="auth-header">
-          <div style={{ display: "inline-flex", alignItems: "center", gap: "8px", color: "var(--accent-green)", fontWeight: 700, fontSize: "13px", textTransform: "uppercase", marginBottom: "8px" }}>
-            <ShieldAlert size={16} /> Restricted Access
-          </div>
           <div className="auth-brand">
-            Finance<span style={{ color: "var(--accent-blue)" }}>AI</span> Admin
+            <div className="auth-brand-badge">F</div>
+            FinanceAI
+            <span
+              style={{
+                fontSize: "12px",
+                fontWeight: 700,
+                color: "var(--accent-blue)",
+                background: "rgba(0, 141, 218, 0.12)",
+                padding: "3px 8px",
+                borderRadius: "6px",
+                letterSpacing: "0.5px",
+                textTransform: "uppercase",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "4px"
+              }}
+            >
+              <Shield size={12} /> Admin
+            </span>
           </div>
           <div className="auth-subtitle">Administrator Portal Authentication</div>
         </div>
@@ -121,7 +136,6 @@ export const AdminLogin = () => {
             type="submit"
             disabled={submitting}
             className="auth-button"
-            style={{ background: "var(--primary-navy)" }}
           >
             {submitting ? "Authenticating..." : "Authorize Admin Session"}
           </button>
