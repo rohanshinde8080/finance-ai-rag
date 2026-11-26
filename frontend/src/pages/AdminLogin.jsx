@@ -1,7 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { ShieldAlert, Eye, EyeOff, Sparkles } from "lucide-react";
+import { getErrorMessage } from "../utils/errorHandler";
 import "../styles/auth.css";
 
 export const AdminLogin = () => {
@@ -11,8 +12,14 @@ export const AdminLogin = () => {
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
-  const { login } = useAuth();
+  const { login, isAuthenticated, isAdmin } = useAuth();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (isAuthenticated && isAdmin) {
+      navigate("/admin/dashboard", { replace: true });
+    }
+  }, [isAuthenticated, isAdmin, navigate]);
 
   const handleFillDemo = () => {
     setEmail("admin@financeai.com");
@@ -26,18 +33,14 @@ export const AdminLogin = () => {
     setSubmitting(true);
 
     try {
-      const user = await login(email, password);
+      const user = await login(email.trim().toLowerCase(), password);
       if (user.role !== "admin") {
         setError("Access Denied: This account does not possess administrator privileges.");
         return;
       }
       navigate("/admin/dashboard");
     } catch (err) {
-      if (!err.response) {
-        setError("Unable to connect to the backend server. Please verify the backend is running at http://localhost:8000.");
-      } else {
-        setError(err.response?.data?.detail || "Invalid admin credentials. Please verify your email and password.");
-      }
+      setError(getErrorMessage(err, "Invalid admin credentials. Please verify your email and password."));
     } finally {
       setSubmitting(false);
     }

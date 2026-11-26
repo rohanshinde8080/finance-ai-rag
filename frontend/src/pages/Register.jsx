@@ -1,7 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { Eye, EyeOff } from "lucide-react";
+import { getErrorMessage } from "../utils/errorHandler";
 import "../styles/auth.css";
 
 export const Register = () => {
@@ -17,8 +18,18 @@ export const Register = () => {
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
-  const { register, login } = useAuth();
+  const { register, login, isAuthenticated, isAdmin } = useAuth();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      if (isAdmin) {
+        navigate("/admin/dashboard", { replace: true });
+      } else {
+        navigate("/dashboard", { replace: true });
+      }
+    }
+  }, [isAuthenticated, isAdmin, navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -26,6 +37,11 @@ export const Register = () => {
 
     if (password.length < 8) {
       setError("Password must be at least 8 characters long.");
+      return;
+    }
+
+    if (!/\d/.test(password) && !/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
+      setError("Password must contain at least one digit or special character (e.g. 1, 2, #, @, !).");
       return;
     }
 
@@ -37,21 +53,17 @@ export const Register = () => {
     setSubmitting(true);
     try {
       await register({
-        full_name: fullName,
-        email,
+        full_name: fullName.trim(),
+        email: email.trim().toLowerCase(),
         password,
         gender: gender || null,
-        mobile_number: mobileNumber || null,
+        mobile_number: mobileNumber.trim() || null,
         date_of_birth: dateOfBirth || null,
       });
-      await login(email, password);
+      await login(email.trim().toLowerCase(), password);
       navigate("/dashboard");
     } catch (err) {
-      if (!err.response) {
-        setError("Unable to connect to the backend server. Please check your network connection.");
-      } else {
-        setError(err.response?.data?.detail || "Registration failed. Please check your details.");
-      }
+      setError(getErrorMessage(err, "Registration failed. Please check your details."));
     } finally {
       setSubmitting(false);
     }

@@ -1,7 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { Eye, EyeOff } from "lucide-react";
+import { getErrorMessage } from "../utils/errorHandler";
 import "../styles/auth.css";
 
 export const Login = () => {
@@ -11,8 +12,18 @@ export const Login = () => {
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
-  const { login } = useAuth();
+  const { login, isAuthenticated, isAdmin } = useAuth();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      if (isAdmin) {
+        navigate("/admin/dashboard", { replace: true });
+      } else {
+        navigate("/dashboard", { replace: true });
+      }
+    }
+  }, [isAuthenticated, isAdmin, navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -27,11 +38,7 @@ export const Login = () => {
         navigate("/dashboard");
       }
     } catch (err) {
-      if (!err.response) {
-        setError("Unable to connect to the backend server. Please verify the backend is running at http://localhost:8000.");
-      } else {
-        setError(err.response?.data?.detail || "Invalid email or password. Please try again.");
-      }
+      setError(getErrorMessage(err, "Invalid email or password. Please try again."));
     } finally {
       setSubmitting(false);
     }

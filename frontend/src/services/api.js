@@ -66,11 +66,25 @@ api.interceptors.response.use(
     }
 
     if (error.response && error.response.status === 401) {
-      // Clear token on 401 and redirect to login if not already there
-      localStorage.removeItem("finance_ai_token");
-      localStorage.removeItem("finance_ai_user");
-      if (!window.location.pathname.includes("/login")) {
-        window.location.href = "/login";
+      // Only clear credentials and redirect if this was NOT an active login or register request
+      const requestUrl = config?.url || "";
+      const isLoginOrRegisterAttempt =
+        requestUrl.includes("/auth/login") || requestUrl.includes("/auth/register");
+
+      if (!isLoginOrRegisterAttempt) {
+        localStorage.removeItem("finance_ai_token");
+        localStorage.removeItem("finance_ai_user");
+
+        // Do not redirect if user is already on a public auth screen (login, register, admin login)
+        const currentPath = typeof window !== "undefined" ? window.location.pathname : "";
+        const isAuthScreen =
+          currentPath.includes("/login") ||
+          currentPath.includes("/register") ||
+          currentPath.includes("/admin/login");
+
+        if (!isAuthScreen && typeof window !== "undefined") {
+          window.location.href = "/login";
+        }
       }
     }
     return Promise.reject(error);
