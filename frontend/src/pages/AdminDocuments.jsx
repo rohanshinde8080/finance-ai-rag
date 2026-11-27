@@ -137,10 +137,11 @@ export const AdminDocuments = () => {
     }
   };
 
-  const filteredDocs = documents.filter((doc) =>
-    doc.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    doc.file_name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredDocs = documents.filter((doc) => {
+    const titleMatch = (doc.title || "").toLowerCase().includes(searchTerm.toLowerCase());
+    const fileMatch = (doc.original_filename || doc.file_name || "").toLowerCase().includes(searchTerm.toLowerCase());
+    return titleMatch || fileMatch;
+  });
 
   const formatFileSize = (bytes) => {
     if (!bytes) return "0 KB";
@@ -366,36 +367,42 @@ export const AdminDocuments = () => {
                 </td>
               </tr>
             ) : (
-              filteredDocs.map((doc) => (
-                <tr key={doc.id}>
-                  <td>
-                    <div style={{ fontWeight: 700, color: "var(--primary-navy)", fontSize: "13px" }}>{doc.title}</div>
-                    <div style={{ fontSize: "11px", color: "var(--text-muted)" }}>{doc.file_name}</div>
-                  </td>
-                  <td>
-                    <span style={{
-                      background: "rgba(30, 62, 98, 0.08)",
-                      color: "var(--primary-slate)",
-                      padding: "2px 8px",
-                      borderRadius: "var(--radius-sm)",
-                      fontSize: "11px",
-                      fontWeight: 600,
-                      textTransform: "capitalize",
-                    }}>
-                      {doc.category.replace(/_/g, " ")}
-                    </span>
-                  </td>
-                  <td>{doc.total_pages}</td>
-                  <td style={{ fontWeight: 600, color: "var(--accent-blue)" }}>{doc.total_chunks}</td>
-                  <td style={{ color: "var(--text-secondary)" }}>{formatFileSize(doc.file_size)}</td>
-                  <td>
-                    <span className={`status-badge ${doc.status.toLowerCase()}`}>
-                      {doc.status}
-                    </span>
-                  </td>
-                  <td style={{ fontSize: "12px", color: "var(--text-secondary)" }}>
-                    {new Date(doc.created_at).toLocaleDateString()}
-                  </td>
+              filteredDocs.map((doc) => {
+                const statusStr = doc.processing_status || doc.status || "INDEXED";
+                const fileName = doc.original_filename || doc.file_name || "Document";
+                const fileSize = doc.file_size_bytes ?? doc.file_size ?? 0;
+                const categoryStr = (doc.category || "General").replace(/_/g, " ");
+
+                return (
+                  <tr key={doc.id}>
+                    <td>
+                      <div style={{ fontWeight: 700, color: "var(--primary-navy)", fontSize: "13px" }}>{doc.title}</div>
+                      <div style={{ fontSize: "11px", color: "var(--text-muted)" }}>{fileName}</div>
+                    </td>
+                    <td>
+                      <span style={{
+                        background: "rgba(30, 62, 98, 0.08)",
+                        color: "var(--primary-slate)",
+                        padding: "2px 8px",
+                        borderRadius: "var(--radius-sm)",
+                        fontSize: "11px",
+                        fontWeight: 600,
+                        textTransform: "capitalize",
+                      }}>
+                        {categoryStr}
+                      </span>
+                    </td>
+                    <td>{doc.total_pages ?? 0}</td>
+                    <td style={{ fontWeight: 600, color: "var(--accent-blue)" }}>{doc.total_chunks ?? 0}</td>
+                    <td style={{ color: "var(--text-secondary)" }}>{formatFileSize(fileSize)}</td>
+                    <td>
+                      <span className={`status-badge ${statusStr.toLowerCase()}`}>
+                        {statusStr}
+                      </span>
+                    </td>
+                    <td style={{ fontSize: "12px", color: "var(--text-secondary)" }}>
+                      {doc.created_at ? new Date(doc.created_at).toLocaleDateString() : "-"}
+                    </td>
                   <td style={{ textAlign: "right" }}>
                     <div style={{ display: "inline-flex", gap: "6px" }}>
                       <button
@@ -439,8 +446,9 @@ export const AdminDocuments = () => {
                     </div>
                   </td>
                 </tr>
-              ))
-            )}
+              );
+            })
+          )}
           </tbody>
         </table>
       </div>
