@@ -11,7 +11,7 @@ def run_migrations():
     """Executes all pending SQL migrations against PostgreSQL."""
     logger.info(f"Connecting to PostgreSQL for migration runner: {settings.DATABASE_URL.split('@')[-1]}")
     
-    with psycopg.connect(settings.DATABASE_URL, autocommit=True, connect_timeout=3) as conn:
+    with psycopg.connect(settings.DATABASE_URL, autocommit=True, connect_timeout=15) as conn:
         with conn.cursor() as cur:
             # 1. Ensure migrations tracking table exists
             cur.execute("""

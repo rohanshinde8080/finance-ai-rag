@@ -31,6 +31,18 @@ VALID_CATEGORIES = [
     "Stock Market", "RBI Circulars", "Government Schemes", "General"
 ]
 
+CATEGORY_ALIASES = {
+    "banking & rbi guidelines": "Banking",
+    "income tax & rules": "Taxation",
+    "gst rules & regulations": "GST",
+    "insurance policies (irdai)": "Insurance",
+    "insurance policies": "Insurance",
+    "mutual funds (sebi)": "Mutual Funds",
+    "stock market (sebi)": "Stock Market",
+    "government financial schemes": "Government Schemes",
+    "general & personal finance": "General",
+}
+
 def process_and_index_document(
     document_id: UUID,
     file_bytes: bytes,
@@ -138,7 +150,11 @@ async def upload_document(
     - Saves raw PDF to storage directory.
     - Executes extraction, chunking, and dual vector storage (pgvector + FAISS).
     """
-    if category not in VALID_CATEGORIES:
+    # Normalize category if human label was provided
+    norm_cat = CATEGORY_ALIASES.get(category.strip().lower(), category.strip())
+    if norm_cat in VALID_CATEGORIES:
+        category = norm_cat
+    elif category not in VALID_CATEGORIES:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=f"Invalid category '{category}'. Must be one of: {', '.join(VALID_CATEGORIES)}"

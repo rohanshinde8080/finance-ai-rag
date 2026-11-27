@@ -318,11 +318,10 @@ def test_e2e_web_fallback_when_unindexed():
         ],
         disclaimer="Disclaimer: FinanceAI is an informational assistant, not a financial advisor."
     )
-    mock_rag_response = mock_web_response
 
     with patch("app.core.dependencies.get_db_cursor", mock_get_db_cursor), \
          patch("app.api.v1.chat.get_db_cursor", mock_get_db_cursor), \
-         patch("app.api.v1.chat.answer_financial_query", return_value=mock_rag_response):
+         patch("app.api.v1.chat.answer_financial_query", return_value=mock_web_response):
 
         res = client.post("/api/v1/chat/ask", headers=headers, json={
             "session_id": session_id,

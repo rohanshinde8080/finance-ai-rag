@@ -30,8 +30,8 @@ def validate_pdf_file(file_bytes: bytes, filename: str) -> None:
             f"File size exceeds the 25MB limit (Size: {len(file_bytes) / (1024*1024):.2f}MB)."
         )
 
-    # Validate Magic Bytes (%PDF-)
-    if not file_bytes.startswith(b"%PDF-"):
+    # Validate Magic Bytes (%PDF-) within first 1024 bytes (per PDF specification ISO 32000-1)
+    if b"%PDF-" not in file_bytes[:1024]:
         raise PDFValidationError("Invalid file signature. File is not a valid PDF document.")
 
     # Integrity check with PyMuPDF

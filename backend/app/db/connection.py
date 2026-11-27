@@ -27,7 +27,7 @@ def init_db_pool() -> ConnectionPool:
                 min_size=settings.DB_MIN_CONNECTIONS,
                 max_size=settings.DB_MAX_CONNECTIONS,
                 timeout=settings.DB_TIMEOUT_SECONDS,
-                kwargs={"connect_timeout": 3},
+                kwargs={"connect_timeout": 15},
                 open=True,
                 configure=_configure_connection
             )
