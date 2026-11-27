@@ -23,6 +23,7 @@ export const docService = {
       headers: {
         "Content-Type": "multipart/form-data",
       },
+      timeout: 120000,
     });
     return response.data;
   },
@@ -33,7 +34,9 @@ export const docService = {
   },
 
   async reprocessDocument(docId) {
-    const response = await api.post(`/documents/${docId}/reprocess`);
+    const response = await api.post(`/documents/${docId}/reprocess`, null, {
+      timeout: 120000,
+    });
     return response.data;
   },
 };

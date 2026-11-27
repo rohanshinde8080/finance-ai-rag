@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { docService } from "../services/docService";
+import { getErrorMessage } from "../utils/errorHandler";
 import {
   FileText,
   UploadCloud,
@@ -15,13 +16,15 @@ import {
 
 const CATEGORIES = [
   { value: "all", label: "All Categories" },
-  { value: "banking", label: "Banking & RBI Guidelines" },
-  { value: "taxation", label: "Income Tax & Rules" },
-  { value: "gst", label: "GST Rules & Regulations" },
-  { value: "insurance", label: "Insurance Policies (IRDAI)" },
-  { value: "investments", label: "Mutual Funds & Stock Market (SEBI)" },
-  { value: "government_schemes", label: "Government Financial Schemes" },
-  { value: "general_finance", label: "General & Personal Finance" },
+  { value: "Banking", label: "Banking & RBI Guidelines" },
+  { value: "Taxation", label: "Income Tax & Rules" },
+  { value: "GST", label: "GST Rules & Regulations" },
+  { value: "Insurance", label: "Insurance Policies (IRDAI)" },
+  { value: "Mutual Funds", label: "Mutual Funds (SEBI)" },
+  { value: "Stock Market", label: "Stock Market (SEBI)" },
+  { value: "RBI Circulars", label: "RBI Circulars" },
+  { value: "Government Schemes", label: "Government Financial Schemes" },
+  { value: "General", label: "General & Personal Finance" },
 ];
 
 export const AdminDocuments = () => {
@@ -33,7 +36,7 @@ export const AdminDocuments = () => {
   // Upload state
   const [file, setFile] = useState(null);
   const [title, setTitle] = useState("");
-  const [uploadCategory, setUploadCategory] = useState("banking");
+  const [uploadCategory, setUploadCategory] = useState("Banking");
   const [uploading, setUploading] = useState(false);
   const [uploadMessage, setUploadMessage] = useState(null);
   const [actionLoadingId, setActionLoadingId] = useState(null);
@@ -88,7 +91,7 @@ export const AdminDocuments = () => {
       const response = await docService.uploadDocument(file, title, uploadCategory);
       setUploadMessage({
         type: "success",
-        text: `Successfully ingested "${response.title}". Generated ${response.total_chunks} vector chunks into FAISS & pgvector!`,
+        text: response.message || `Successfully ingested "${response.title}" into ${response.category}.`,
       });
       setFile(null);
       setTitle("");
@@ -98,7 +101,7 @@ export const AdminDocuments = () => {
       fetchDocuments();
     } catch (err) {
       console.error("Upload error", err);
-      const errDetail = err.response?.data?.detail || "Document ingestion failed. Please check file formatting.";
+      const errDetail = getErrorMessage(err, "Document ingestion failed. Please check file formatting.");
       setUploadMessage({ type: "error", text: errDetail });
     } finally {
       setUploading(false);
