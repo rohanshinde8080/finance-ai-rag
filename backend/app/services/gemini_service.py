@@ -11,7 +11,7 @@ MANDATORY_FINANCIAL_DISCLAIMER = (
 )
 
 DOCUMENT_SYSTEM_INSTRUCTION = """
-You are a Strict Financial Policy AI Assistant.
+You are FinanceAI, a senior domain-specific financial assistant specializing in Indian regulatory frameworks (RBI, SEBI, Income Tax, GST, IRDAI, Banking, and Personal Finance).
 
 Your job is to answer ONLY questions related to Financial Policies using the provided FAISS documents and verified Tavily search results from the approved Government domains.
 

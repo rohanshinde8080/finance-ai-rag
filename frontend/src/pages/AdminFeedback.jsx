@@ -168,7 +168,7 @@ export const AdminFeedback = () => {
                       }}>
                         <ThumbsUp size={12} /> HELPFUL
                       </span>
-                    ) : (
+                    ) : item.rating < 0 ? (
                       <span style={{
                         display: "inline-flex",
                         alignItems: "center",
@@ -181,6 +181,20 @@ export const AdminFeedback = () => {
                         fontWeight: 700,
                       }}>
                         <ThumbsDown size={12} /> UNHELPFUL
+                      </span>
+                    ) : (
+                      <span style={{
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: "4px",
+                        background: "rgba(0, 141, 218, 0.12)",
+                        color: "var(--accent-blue)",
+                        padding: "3px 8px",
+                        borderRadius: "var(--radius-full)",
+                        fontSize: "11px",
+                        fontWeight: 700,
+                      }}>
+                        <MessageCircle size={12} /> INQUIRY
                       </span>
                     )}
                   </td>
@@ -200,6 +214,10 @@ export const AdminFeedback = () => {
                       ) : item.source_type === "tavily_web" ? (
                         <>
                           <Globe size={12} style={{ color: "var(--accent-amber)" }} /> Tavily Web
+                        </>
+                      ) : item.source_type === "direct_feedback" ? (
+                        <>
+                          <MessageCircle size={12} style={{ color: "var(--accent-blue)" }} /> User Inquiry
                         </>
                       ) : (
                         <>

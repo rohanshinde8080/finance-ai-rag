@@ -37,12 +37,20 @@ export const chatService = {
     },
 
   async submitFeedback(messageId, rating, comments = "") {
-      const response = await api.post("/feedback/", {
-        message_id: messageId,
-        rating,
-        comments: comments || null,
-      });
-      return response.data;
-    },
-  };
+    const response = await api.post("/feedback/", {
+      message_id: messageId,
+      rating,
+      comments: comments || null,
+    });
+    return response.data;
+  },
+
+  async submitInquiry(comments, rating = 0) {
+    const response = await api.post("/feedback/inquiry", {
+      comments,
+      rating,
+    });
+    return response.data;
+  },
+};
 

@@ -3,10 +3,48 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, status
 from app.core.dependencies import get_current_user
 from app.db.connection import get_db_cursor
-from app.models.feedback import FeedbackCreateRequest, FeedbackResponse, UserFeedbackItem
+from app.models.feedback import FeedbackCreateRequest, GeneralFeedbackRequest, FeedbackResponse, UserFeedbackItem
 from app.utils.logger import logger
 
 router = APIRouter(prefix="/feedback", tags=["Feedback"])
+
+@router.post(
+    "/inquiry",
+    response_model=FeedbackResponse,
+    status_code=status.HTTP_201_CREATED,
+    summary="Submit direct user inquiry or support feedback to administrators"
+)
+def submit_general_inquiry(
+    request: GeneralFeedbackRequest,
+    current_user: Dict[str, Any] = Depends(get_current_user)
+):
+    """
+    Submits user feedback or support inquiries from the Help & Support modal directly to the admin portal.
+    """
+    user_id = current_user["id"]
+
+    with get_db_cursor() as cur:
+        cur.execute(
+            """
+            INSERT INTO feedback (user_id, rating, comments)
+            VALUES (%s, %s, %s)
+            RETURNING id, message_id, user_id, rating, comments, created_at;
+            """,
+            (user_id, request.rating, request.comments.strip())
+        )
+        fb = cur.fetchone()
+
+    logger.info(f"Direct support inquiry/feedback received from user {current_user['email']}")
+
+    return FeedbackResponse(
+        id=fb["id"],
+        message_id=fb["message_id"],
+        user_id=fb["user_id"],
+        rating=fb["rating"],
+        comments=fb["comments"],
+        created_at=fb["created_at"],
+        message="Your inquiry has been successfully submitted to administrators."
+    )
 
 @router.post(
     "",
@@ -92,9 +130,9 @@ def get_my_feedback(current_user: Dict[str, Any] = Depends(get_current_user)):
         cur.execute(
             """
             SELECT f.id, f.message_id, f.rating, f.comments, f.created_at,
-                   m.content AS message_content
+                   COALESCE(m.content, 'Direct Support Inquiry / Feedback') AS message_content
             FROM feedback f
-            JOIN chat_messages m ON f.message_id = m.id
+            LEFT JOIN chat_messages m ON f.message_id = m.id
             WHERE f.user_id = %s
             ORDER BY f.created_at DESC;
             """,

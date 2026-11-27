@@ -95,7 +95,7 @@ def answer_financial_query(
 
     # Step 4: Both document context and web search unavailable
     logger.warning("Both internal documents and official web search yielded insufficient information.")
-    fallback_message = "Sorry, I could not find this question answer in this financial policy."
+    fallback_message = "Sorry, I could not find this question answer in financial policy."
 
     return RAGResponse(
         answer=fallback_message,

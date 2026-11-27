@@ -16,10 +16,22 @@ class FeedbackCreateRequest(BaseModel):
             raise ValueError("Rating must be either 1 (Thumbs Up) or -1 (Thumbs Down).")
         return v
 
+class GeneralFeedbackRequest(BaseModel):
+    """Schema for submitting general portal feedback or support inquiries."""
+    comments: str = Field(..., min_length=2, max_length=2000, description="User question or feedback message")
+    rating: int = Field(0, description="0 for general inquiry, 1 for positive, -1 for negative")
+
+    @field_validator("rating")
+    @classmethod
+    def validate_rating_value(cls, v: int) -> int:
+        if v not in (1, -1, 0):
+            raise ValueError("Rating must be 1, -1, or 0.")
+        return v
+
 class FeedbackResponse(BaseModel):
     """Response returned upon feedback submission."""
     id: UUID
-    message_id: UUID
+    message_id: Optional[UUID] = None
     user_id: UUID
     rating: int
     comments: Optional[str] = None
@@ -31,7 +43,7 @@ class UserFeedbackItem(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     id: UUID
-    message_id: UUID
+    message_id: Optional[UUID] = None
     rating: int
     comments: Optional[str] = None
     created_at: datetime

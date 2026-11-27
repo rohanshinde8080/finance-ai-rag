@@ -48,12 +48,12 @@ class AdminFeedbackItem(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     id: UUID
-    message_id: UUID
+    message_id: Optional[UUID] = None
     user_email: str
     rating: int
     comments: Optional[str] = None
-    message_content: str
-    source_type: str
+    message_content: Optional[str] = "Direct User Feedback / Support Inquiry"
+    source_type: Optional[str] = "direct_feedback"
     created_at: datetime
 
 class AdminFeedbackSummaryResponse(BaseModel):

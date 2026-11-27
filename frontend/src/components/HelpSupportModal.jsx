@@ -1,10 +1,15 @@
 import React, { useState } from "react";
-import { X, HelpCircle, ChevronDown, ChevronUp, MessageSquare, Send, CheckCircle2, BookOpen } from "lucide-react";
+import { X, HelpCircle, ChevronDown, ChevronUp, MessageSquare, Send, CheckCircle2, AlertCircle, RefreshCw, BookOpen } from "lucide-react";
+import { chatService } from "../services/chatService";
+import { getErrorMessage } from "../utils/errorHandler";
 
 export const HelpSupportModal = ({ isOpen, onClose }) => {
   const [openFaq, setOpenFaq] = useState(0);
   const [supportMessage, setSupportMessage] = useState("");
   const [submitted, setSubmitted] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [successMsg, setSuccessMsg] = useState("");
 
   if (!isOpen) return null;
 
@@ -27,14 +32,25 @@ export const HelpSupportModal = ({ isOpen, onClose }) => {
     }
   ];
 
-  const handleSupportSubmit = (e) => {
+  const handleSupportSubmit = async (e) => {
     e.preventDefault();
     if (!supportMessage.trim()) return;
-    setSubmitted(true);
-    setTimeout(() => {
+    try {
+      setLoading(true);
+      setError("");
+      const res = await chatService.submitInquiry(supportMessage.trim(), 0);
+      setSubmitted(true);
+      setSuccessMsg(res?.message || "Thank you! Your feedback has been sent to the admin portal.");
       setSupportMessage("");
-      setSubmitted(false);
-    }, 4000);
+      setTimeout(() => {
+        setSubmitted(false);
+      }, 5000);
+    } catch (err) {
+      console.error("Failed to submit feedback inquiry", err);
+      setError(getErrorMessage(err, "Failed to submit feedback. Please try again."));
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -200,6 +216,24 @@ export const HelpSupportModal = ({ isOpen, onClose }) => {
               Have suggestions or noticed an error in a regulation citation? Send feedback to the MCA project team.
             </p>
 
+            {error && (
+              <div
+                style={{
+                  background: "rgba(239, 68, 68, 0.12)",
+                  color: "var(--accent-red)",
+                  padding: "10px 14px",
+                  borderRadius: "var(--radius-sm)",
+                  fontSize: "12px",
+                  marginBottom: "12px",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "8px",
+                }}
+              >
+                <AlertCircle size={15} /> {error}
+              </div>
+            )}
+
             {submitted ? (
               <div
                 style={{
@@ -214,13 +248,14 @@ export const HelpSupportModal = ({ isOpen, onClose }) => {
                   gap: "8px",
                 }}
               >
-                <CheckCircle2 size={16} /> Thank you! Your feedback has been logged for evaluation.
+                <CheckCircle2 size={16} /> {successMsg || "Thank you! Your feedback has been logged for evaluation."}
               </div>
             ) : (
               <form onSubmit={handleSupportSubmit}>
                 <textarea
                   rows={3}
                   required
+                  disabled={loading}
                   placeholder="Describe your question or feedback..."
                   value={supportMessage}
                   onChange={(e) => setSupportMessage(e.target.value)}
@@ -238,6 +273,7 @@ export const HelpSupportModal = ({ isOpen, onClose }) => {
                 />
                 <button
                   type="submit"
+                  disabled={loading}
                   style={{
                     padding: "8px 16px",
                     background: "var(--primary-navy)",
@@ -248,9 +284,19 @@ export const HelpSupportModal = ({ isOpen, onClose }) => {
                     display: "inline-flex",
                     alignItems: "center",
                     gap: "6px",
+                    cursor: loading ? "not-allowed" : "pointer",
+                    opacity: loading ? 0.7 : 1,
                   }}
                 >
-                  <Send size={14} /> Send Inquiry
+                  {loading ? (
+                    <>
+                      <RefreshCw size={14} className="spin" /> Sending...
+                    </>
+                  ) : (
+                    <>
+                      <Send size={14} /> Send Inquiry
+                    </>
+                  )}
                 </button>
               </form>
             )}

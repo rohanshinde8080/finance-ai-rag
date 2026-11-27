@@ -224,10 +224,11 @@ def get_feedback_summary(
             """
             SELECT f.id, f.message_id, f.rating, f.comments, f.created_at,
                    u.email AS user_email,
-                   m.content AS message_content, m.source_type
+                   COALESCE(m.content, 'Direct User Feedback / Support Inquiry') AS message_content,
+                   COALESCE(m.source_type, 'direct_feedback') AS source_type
             FROM feedback f
             JOIN users u ON f.user_id = u.id
-            JOIN chat_messages m ON f.message_id = m.id
+            LEFT JOIN chat_messages m ON f.message_id = m.id
             ORDER BY f.created_at DESC
             LIMIT %s;
             """,
@@ -235,7 +236,8 @@ def get_feedback_summary(
         )
         recent_feedbacks = cur.fetchall()
 
-    sat_rate = (pos_feedback / total_feedback * 100.0) if total_feedback > 0 else 100.0
+    total_rated = pos_feedback + neg_feedback
+    sat_rate = (pos_feedback / total_rated * 100.0) if total_rated > 0 else 100.0
 
     return AdminFeedbackSummaryResponse(
         total_feedback_count=total_feedback,
