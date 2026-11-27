@@ -95,11 +95,7 @@ def answer_financial_query(
 
     # Step 4: Both document context and web search unavailable
     logger.warning("Both internal documents and official web search yielded insufficient information.")
-    fallback_message = (
-        "I could not locate sufficient authoritative information in the indexed financial documents "
-        "or official government portals to answer your query with confidence. "
-        "Please refine your search terms or verify with an official circular from RBI, SEBI, or the Income Tax Department."
-    )
+    fallback_message = "Sorry, I could not find this question answer in this financial policy."
 
     return RAGResponse(
         answer=fallback_message,

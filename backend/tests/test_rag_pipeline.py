@@ -121,7 +121,7 @@ def test_rag_orchestrator_total_fallback_when_both_unavailable():
             response: RAGResponse = answer_financial_query("Random nonexistent obscure financial inquiry 99999")
             assert response.source_type == "fallback"
             assert response.confidence_score == 0.0
-            assert "could not locate sufficient authoritative information" in response.answer
+            assert "Sorry, I could not find this question answer in this financial policy." in response.answer
             assert response.citations == []
             assert response.web_sources == []
             assert MANDATORY_FINANCIAL_DISCLAIMER in response.disclaimer
